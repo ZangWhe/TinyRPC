@@ -10,6 +10,7 @@
 
 #include "log.h"
 #include "util.h"
+#include "config.h"
 
 namespace RPC{
 
@@ -29,7 +30,20 @@ namespace RPC{
             return "UNKNOW";
         }
     }
-    
+   
+    LogLevel StringToLogLevel(const std::string& log_level){
+    	if(log_level == "DEBUG"){
+		return Debug;	
+	}else if(log_level == "INFO"){
+		return Info;
+	}else if(log_level == "ERROR"){
+		return Error;	
+	}else if(log_level == "UNKNOW"){
+		return Unknow;
+	}
+    }
+
+ 
     std::string LogEvent::toString(){
 
         //struct timeval适用于精确测量时间间隔，而struct tm适用于表示和操作日历时间的各个成分。
@@ -60,8 +74,7 @@ namespace RPC{
 
         ss << "[" << LogLevelToString(m_level) << "]\t"
             << "[" << time_str << "]\t"
-            << "[" << m_pid << ":" << m_thread_id << "]\t"
-            << "[" << std::string(__FILE__) << ":" << __LINE__ <<"]";
+            << "[" << m_pid << ":" << m_thread_id << "]\t";
 
         // 获取当前线程处理的请求的 msgid
 
@@ -76,24 +89,34 @@ namespace RPC{
         // }
         return ss.str();
     }
+
     static Logger* g_logger = nullptr;
-    Logger* Logger::getGlobalLogger(){
-        if(g_logger){
-            return g_logger;
-        }
-        return new Logger();
+    Logger* Logger::GetGlobalLogger(){
+        return g_logger;
+    }
+    void InitGlobalLogger(){
+    	LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);	     printf("Init Log Level [%s]\n",LogLevelToString(global_log_level).c_str());
+	g_logger = new Logger(global_log_level);
+	
     }
 
     void Logger::pushLog(const std::string& msg){
-        m_buffer.push(msg);
+	ScopeMutex<Mutex> lock(m_mutex);
+	m_buffer.push(msg);
+	lock.unlock();
     }
 
     void Logger::log(){
-        while(!m_buffer.empty()){
-            std::string msg = m_buffer.front();
-            m_buffer.pop();
+	ScopeMutex<Mutex> lock(m_mutex);
+	std::queue<std::string> temp_queue = m_buffer;
+	m_buffer.swap(temp_queue);
+	lock.unlock();
+	while(!temp.queue.empty()){
+            std::string msg = temp_queue.front();
+            temp_queue.pop();
             printf(msg.c_str());
-        }
+     	}
+	lock.unlock();
     }
 
 

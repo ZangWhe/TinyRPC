@@ -2,7 +2,7 @@
 #include<unistd.h>
 #include<sys/syscall.h>
 
-#include "RPC/common/util.h"
+#include "util.h"
 
 namespace RPC{
     static int32_t g_p_id = 0;
