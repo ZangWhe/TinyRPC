@@ -1,21 +1,24 @@
+
 #include<tinyxml/tinyxml.h>
-#include<config.h>
+#include "config.h"
 
 
-#define READ_XML_NODE(name,parent)						\
-TiXmlElement* name##_node = parent->FirstChildElement(#name);			\
-if(!name##_node){								\
+#define READ_XML_NODE(name,parent)											\
+TiXmlElement* name##_node = parent->FirstChildElement(#name);				\
+if(!name##_node){															\
 	printf("start RPC server error,faild to read node [%s]\n",#name);       \
-	exit(0);								\
-}										\
+	exit(0);																\
+}																			\
 
-#define READ_STRING_FROM_XML_NODE(name,parent)					\
-TiXmlDocument* name##_node = parent->FirstChildElement(#name);			\
-if(!name##_node || !name##_node->GetText()){					\
+
+#define READ_STRING_FROM_XML_NODE(name,parent)								\
+TiXmlElement* name##_node = parent->FirstChildElement(#name);				\
+if(!name##_node || !name##_node->GetText()){								\
 	printf("start RPC server error,faild to read config file %s",#name);	\
-        exit(0);								\
-}										\
-std::string name##_str = std::string(name##_node->GetText());			\
+    exit(0);																\
+}																			\
+std::string name##_str = std::string(name##_node->GetText());				\
+
 
 namespace RPC{
 	
@@ -30,8 +33,8 @@ namespace RPC{
 	}
 	
 	RPC::Config::Config(const char* xmlfile){
-		TiXmlDocument* xml_document = new TiXmLDocument();
-		bool rt = xml_document->loadFile(xmlfile);
+		TiXmlDocument* xml_document = new TiXmlDocument();
+		bool rt = xml_document->LoadFile(xmlfile);
 		if(!rt){
 			printf("start RPC server error,faild to read config file %s",xmlfile);
 			exit(0);

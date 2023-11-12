@@ -9,7 +9,7 @@ void* func(void*){
 	return NULL;
 }
 int main(){
-	RPC::Config::SetGlobalConfig("../conf/rpc.xml");
+	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
 	RPC::Logger::InitGlobalLogger();
 	pthread_t thread;
 	pthread_create(&thread,NULL,&func,NULL);

@@ -17,7 +17,7 @@ namespace RPC{
     
 
 
-    std::string LogEvent::LogLevelToString(LogLevel level){
+    std::string LogLevelToString(LogLevel level){
         switch (level)
         {
         case Debug:
@@ -33,14 +33,15 @@ namespace RPC{
    
     LogLevel StringToLogLevel(const std::string& log_level){
     	if(log_level == "DEBUG"){
-		return Debug;	
-	}else if(log_level == "INFO"){
-		return Info;
-	}else if(log_level == "ERROR"){
-		return Error;	
-	}else if(log_level == "UNKNOW"){
-		return Unknow;
-	}
+            return Debug;	
+        }else if(log_level == "INFO"){
+            return Info;
+        }else if(log_level == "ERROR"){
+            return Error;	
+        }else if(log_level == "UNKNOW"){
+            return Unknow;
+        }
+        return Unknow;
     }
 
  
@@ -94,29 +95,30 @@ namespace RPC{
     Logger* Logger::GetGlobalLogger(){
         return g_logger;
     }
-    void InitGlobalLogger(){
-    	LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);	     printf("Init Log Level [%s]\n",LogLevelToString(global_log_level).c_str());
-	g_logger = new Logger(global_log_level);
+    void Logger::InitGlobalLogger(){
+    	LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);	     
+        printf("Init Log Level [%s]\n",LogLevelToString(global_log_level).c_str());
+	    g_logger = new Logger(global_log_level);
 	
     }
 
     void Logger::pushLog(const std::string& msg){
-	ScopeMutex<Mutex> lock(m_mutex);
-	m_buffer.push(msg);
-	lock.unlock();
+        ScopeMutex<Mutex> lock(m_mutex);
+        m_buffer.push(msg);
+        lock.unlock();
     }
 
     void Logger::log(){
-	ScopeMutex<Mutex> lock(m_mutex);
-	std::queue<std::string> temp_queue = m_buffer;
-	m_buffer.swap(temp_queue);
-	lock.unlock();
-	while(!temp.queue.empty()){
-            std::string msg = temp_queue.front();
-            temp_queue.pop();
-            printf(msg.c_str());
-     	}
-	lock.unlock();
+        ScopeMutex<Mutex> lock(m_mutex);
+        std::queue<std::string> temp_queue = m_buffer;
+        m_buffer.swap(temp_queue);
+        lock.unlock();
+        while(!temp_queue.empty()){
+                std::string msg = temp_queue.front();
+                temp_queue.pop();
+                printf("%s",msg.c_str());
+            }
+        lock.unlock();
     }
 
 

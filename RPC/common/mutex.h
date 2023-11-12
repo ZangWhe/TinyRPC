@@ -5,16 +5,17 @@
 
 namespace RPC{
 
+// RAII机制 ：利用对象的析构完成锁的释放
 
 template<class T>
 class ScopeMutex{
 public:
 	ScopeMutex(T& mutex):m_mutex(mutex){
-		T.lock();
+		m_mutex.lock();
 		m_is_lock = true;
 	}
 	~ScopeMutex(){
-		T.unlock();
+		m_mutex.unlock();
 		m_is_lock = false;
 	}
 	void lock(){
@@ -30,7 +31,7 @@ public:
 
 private:
 	T& m_mutex;
-	boolean m_is_lock {false};
+	bool m_is_lock {false};
 
 };
 

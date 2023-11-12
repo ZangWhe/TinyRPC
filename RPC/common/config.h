@@ -1,7 +1,7 @@
 #ifndef RPC_COMMON_CONFIG_H
 #define RPC_COMMON_CONFIG_H
 
-
+#include<string>
 
 namespace RPC{
 

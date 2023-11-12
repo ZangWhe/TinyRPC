@@ -14,45 +14,51 @@
 if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)\
 {\
 RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,__VA_ARGS__) + '\n');                                           \
+ + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
 RPC::Logger::GetGlobalLogger()->log();                                                  \
 }\
+
 #define INFOLOG(str, ...)                                                               \
 if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Info)\
 {\
-RPC::Logger::GetGlobalLogger()->pushLog(RPC::Logger::getGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Info))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t"  + RPC::formatString(str,__VA_ARGS__) + '\n'));  \
+RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Info))->toString())\
+ + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
 RPC::Logger::GetGlobalLogger()->log();                                                  \
 }\
+
 
 #define ERRORLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)\
+if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Error)\
 {\
-RPC::Logger::GetGlobalLogger()->pushLog(RPC::Logger::getGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString())\
-  + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,__VA_ARGS__) + '\n')); \
+RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Error))->toString())\
+ + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
 RPC::Logger::GetGlobalLogger()->log();                                                  \
 }\
 
+
+
 #define UNKNOWLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)\
+if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Unknow)\
 {\
-RPC::Logger::GetGlobalLogger()->pushLog(RPC::Logger::getGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString()) \
-+ "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t"  + RPC::formatString(str,__VA_ARGS__) + '\n'));  \
-RPC::Logger:GetGlobalLogger()->log();                                                  \
+RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Unknow))->toString())\
+ + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
+RPC::Logger::GetGlobalLogger()->log();                                                  \
 }\
 
 
 namespace RPC{
     enum LogLevel{
         Unknow = 0,
-	Debug = 1,
+	    Debug = 1,
         Info = 2,
         Error = 3
     };
 
     
-    // //日志级别转字符串，放哪里？
-    // std::string LogLevelToString(LogLevel level);
+    // //日志级别转字符串
+    std::string LogLevelToString(LogLevel level);
+    // 字符串转日志级别
+    LogLevel StringToLogLevel(const std::string& log_level);
 
     template<typename... Args>
     std::string formatString(const char* str,Args&&... args) {
@@ -84,10 +90,10 @@ namespace RPC{
 
         public:
             static Logger* GetGlobalLogger();
-	    static void InitGlobalLogger();
+	        static void InitGlobalLogger();
         private:
             LogLevel m_set_level;
-		Mutex m_mutex;	    
+		    Mutex m_mutex;	    
     };
 
 
@@ -107,9 +113,9 @@ namespace RPC{
             std::string toString();
 
             //日志级别转字符串
-            std::string LogLevelToString(LogLevel level);
-	    //字符串转日志级别
-	    LogLevel StringToLogLevel(const std::string& log_level);
+            //std::string LogLevelToString(LogLevel level);
+	        //字符串转日志级别
+	        //LogLevel StringToLogLevel(const std::string& log_level);
         private:
             std::string m_file_name;    //文件名
             int32_t m_file_line;    //行号

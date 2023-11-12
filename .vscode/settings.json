@@ -47,7 +47,15 @@
         "istream": "cpp",
         "cinttypes": "cpp",
         "sstream": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "ratio": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "set": "cpp"
     },
     "C_Cpp.dimInactiveRegions": false,
     
