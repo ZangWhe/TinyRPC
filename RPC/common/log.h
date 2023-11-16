@@ -63,11 +63,13 @@ namespace RPC{
     template<typename... Args>
     std::string formatString(const char* str,Args&&... args) {
 
+        //int size = snprintf(nullptr, 0, str, std::forward<Args>(args)...);
+        
         int size = snprintf(nullptr, 0, str, args...);
-
         std::string result;
         if (size > 0) {
             result.resize(size);
+            // snprintf(&result[0], size + 1, str, std::forward<Args>(args)...);
             snprintf(&result[0], size + 1, str, args...);
         }
 

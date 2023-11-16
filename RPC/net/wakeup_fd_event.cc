@@ -1,7 +1,7 @@
 #include <unistd.h>
 
-#include "RPC/net/wakeup_fd_event.h"
-#include "RPC/common/log.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/net/wakeup_fd_event.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/common/log.h"
 
 namespace RPC{
     WakeupFdEvent::WakeupFdEvent(int fd):FdEvent(fd){

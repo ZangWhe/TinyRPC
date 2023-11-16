@@ -7,9 +7,9 @@
 #include<functional>
 #include<queue>
 
-#include "RPC/common/mutex.h"
-#include "RPC/net/fd_event.h"
-#include "RPC/net/wakeup_fd_event.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/common/mutex.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/net/fd_event.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/net/wakeup_fd_event.h"
 
 namespace RPC{
 

@@ -1,5 +1,5 @@
-#include "RPC/net/fd_event.h"
-#include "RPC/common/log.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/net/fd_event.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/common/log.h"
 
 namespace RPC
 {
@@ -16,7 +16,9 @@ namespace RPC
         }else if(event_type == TriggerEvent::OUT_EVENT){
             return m_write_callback;
         }
-
+        return []() {
+            // 默认的处理或者什么也不做
+         };
     }
 
 

@@ -4,10 +4,9 @@
 #include<sys/eventfd.h>
 #include<string.h>
 
-
-#include "RPC/common/log.h"
-#include "RPC/common/util.h"
-#include "eventloop.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/common/log.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/common/util.h"
+#include "/home/desktop/gitrep/TinyRPC/RPC/net/eventloop.h"
 
 
 namespace RPC{
@@ -130,7 +129,7 @@ DEBUGLOG("success to delete event,fd[%d]",event->getFd());                      
     }
 
     void EventLoop::wakeup(){
-
+        m_wakeup_fd_event->wakeup();
     }
     void EventLoop::dealWakeup(){
 
@@ -165,7 +164,7 @@ DEBUGLOG("success to delete event,fd[%d]",event->getFd());                      
         return getThreadId() == m_thread_id;
     }
 
-    void EventLoop::addTask(std::function<void()> cb,bool is_wake_up = false){
+    void EventLoop::addTask(std::function<void()> cb,bool is_wake_up){
         ScopeMutex<Mutex> lock(m_mutex);
         m_pending_tasks.push(cb);
         lock.unlock();
