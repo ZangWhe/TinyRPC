@@ -17,30 +17,34 @@ int main(){
 	
     RPC::EventLoop* eventloop = new RPC::EventLoop();
     
-    
+    DEBUGLOG("Eventloop object Init Success");
     int listen_fd = socket(AF_INET,SOCK_STREAM,0);
-
+    
     if(listen_fd == -1){
         ERRORLOG("Socket Create Error");
-        exit(0);
+        exit(1);
     }
     sockaddr_in addr;
     memset(&addr,0,sizeof(addr));
 
-    addr.sin_port = htons(12345);
+    addr.sin_port = htons(12346);
     addr.sin_family = AF_INET;
     inet_aton("127.0.0.1",&addr.sin_addr);
 
     int rt = bind(listen_fd,reinterpret_cast<sockaddr*>(&addr),sizeof(addr));
     if(rt != 0){
         ERRORLOG("Socket Bind Error");
-        exit(0);
+        exit(1);
     }
-
+    rt = listen(listen_fd,100);
+    if(rt != 0){
+        ERRORLOG("Socket Listen Error");
+        exit(1);
+    }
     RPC::FdEvent event(listen_fd);
     event.listen(RPC::FdEvent::IN_EVENT,[listen_fd](){
         sockaddr_in peer_addr;
-        socklen_t addr_len = 0;
+        socklen_t addr_len = sizeof(peer_addr);
         memset(&peer_addr,0,sizeof(peer_addr));
         int client_fd = accept(listen_fd,reinterpret_cast<sockaddr*>(&peer_addr),&addr_len);
 

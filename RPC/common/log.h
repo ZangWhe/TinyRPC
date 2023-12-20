@@ -10,43 +10,62 @@
 #include "config.h"
 #include "mutex.h"
 
-#define DEBUGLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)\
-{\
-RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
-RPC::Logger::GetGlobalLogger()->log();                                                  \
-}\
 
-#define INFOLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Info)\
-{\
-RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Info))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
-RPC::Logger::GetGlobalLogger()->log();                                                  \
-}\
-
-
-#define ERRORLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Error)\
-{\
-RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Error))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
-RPC::Logger::GetGlobalLogger()->log();                                                  \
-}\
-
-
-
-#define UNKNOWLOG(str, ...)                                                               \
-if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Unknow)\
-{\
-RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Unknow))->toString())\
- + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');                                           \
-RPC::Logger::GetGlobalLogger()->log();                                                  \
-}\
 
 
 namespace RPC{
+    
+    template<typename... Args>
+    std::string formatString(const char* str,Args&&... args) {
+
+        
+        
+        int size = snprintf(nullptr, 0, str, args...);
+        
+        std::string result;
+        if (size > 0) {
+            result.resize(size);
+            
+            snprintf(&result[0], size + 1, str, args...);
+        }
+
+        return result;
+    }
+
+    #define DEBUGLOG(str, ...)                                                                                                  \
+    if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)                                                             \
+    {                                                                                                                           \
+    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString())                            \
+    + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
+    RPC::Logger::GetGlobalLogger()->log();                                                                                      \
+    }                                                                                                                           \
+
+    #define INFOLOG(str, ...)                                                                                                   \
+    if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Info)                                                              \
+    {                                                                                                                           \
+    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Info))->toString())                             \
+    + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
+    RPC::Logger::GetGlobalLogger()->log();                                                                                      \
+    }                                                                                                                           \
+
+
+    #define ERRORLOG(str, ...)                                                                                                  \
+    if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Error)                                                             \
+    {                                                                                                                           \
+    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Error))->toString())                            \
+    + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
+    RPC::Logger::GetGlobalLogger()->log();                                                                                      \
+    }                                                                                                                           \
+
+    #define UNKNOWLOG(str, ...)                                                                                                 \
+    if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Unknow)                                                            \
+    {                                                                                                                           \
+    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Unknow))->toString())                           \
+    + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
+    RPC::Logger::GetGlobalLogger()->log();                                                                                      \
+    }                                                                                                                           \
+
+
     enum LogLevel{
         Unknow = 0,
 	    Debug = 1,
@@ -55,26 +74,12 @@ namespace RPC{
     };
 
     
-    // //日志级别转字符串
+    // 日志级别转字符串
     std::string LogLevelToString(LogLevel level);
     // 字符串转日志级别
     LogLevel StringToLogLevel(const std::string& log_level);
 
-    template<typename... Args>
-    std::string formatString(const char* str,Args&&... args) {
-
-        //int size = snprintf(nullptr, 0, str, std::forward<Args>(args)...);
-        
-        int size = snprintf(nullptr, 0, str, args...);
-        std::string result;
-        if (size > 0) {
-            result.resize(size);
-            // snprintf(&result[0], size + 1, str, std::forward<Args>(args)...);
-            snprintf(&result[0], size + 1, str, args...);
-        }
-
-        return result;
-    }
+    
 
     class Logger{
         public:
@@ -119,11 +124,11 @@ namespace RPC{
 	        //字符串转日志级别
 	        //LogLevel StringToLogLevel(const std::string& log_level);
         private:
-            std::string m_file_name;    //文件名
-            int32_t m_file_line;    //行号
-            int32_t m_pid;  //进程号
-            int32_t m_thread_id;    //线程号
-            LogLevel m_level;   //日志级别
+            std::string m_file_name;        //文件名
+            int32_t m_file_line;            //行号
+            int32_t m_pid;                  //进程号
+            int32_t m_thread_id;            //线程号
+            LogLevel m_level;               //日志级别
 
             
         

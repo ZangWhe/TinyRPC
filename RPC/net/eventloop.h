@@ -7,9 +7,13 @@
 #include<functional>
 #include<queue>
 
-#include "/home/desktop/gitrep/TinyRPC/RPC/common/mutex.h"
-#include "/home/desktop/gitrep/TinyRPC/RPC/net/fd_event.h"
-#include "/home/desktop/gitrep/TinyRPC/RPC/net/wakeup_fd_event.h"
+// #include "/home/desktop/gitrep/TinyRPC/RPC/common/mutex.h"
+// #include "/home/desktop/gitrep/TinyRPC/RPC/net/fd_event.h"
+// #include "/home/desktop/gitrep/TinyRPC/RPC/net/wakeup_fd_event.h"
+
+#include "RPC/common/mutex.h"
+#include "RPC/net/fd_event.h"
+#include "RPC/net/wakeup_fd_event.h"
 
 namespace RPC{
 
@@ -40,7 +44,7 @@ namespace RPC{
             void initWakeupFdEvent();
             
         private:
-            pid_t m_thread_id;
+            pid_t m_thread_id{0};
 
             int m_epoll_fd{0};
 

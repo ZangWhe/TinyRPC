@@ -14,9 +14,6 @@
 
 namespace RPC{
 
-    
-
-
     std::string LogLevelToString(LogLevel level){
         switch (level)
         {
@@ -110,7 +107,7 @@ namespace RPC{
 
     void Logger::log(){
         ScopeMutex<Mutex> lock(m_mutex);
-        std::queue<std::string> temp_queue = m_buffer;
+        std::queue<std::string> temp_queue;
         m_buffer.swap(temp_queue);
         lock.unlock();
         while(!temp_queue.empty()){

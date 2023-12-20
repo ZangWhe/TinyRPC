@@ -7,6 +7,7 @@
 namespace RPC{
     static int32_t g_p_id = 0;
     static thread_local int32_t t_thread_id = 0;
+    
     pid_t getPId(){
         if(g_p_id == 0){
             g_p_id = getpid();
