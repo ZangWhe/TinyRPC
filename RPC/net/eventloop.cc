@@ -4,9 +4,9 @@
 #include<sys/eventfd.h>
 #include<string.h>
 
-#include "/home/desktop/gitrep/TinyRPC/RPC/common/log.h"
-#include "/home/desktop/gitrep/TinyRPC/RPC/common/util.h"
-#include "/home/desktop/gitrep/TinyRPC/RPC/net/eventloop.h"
+#include "RPC/common/log.h"
+#include "RPC/common/util.h"
+#include "RPC/net/eventloop.h"
 
 
 namespace RPC{
@@ -118,15 +118,19 @@ namespace RPC{
                     cb();
                 }
             }
+
+            // 存在定时任务就执行
+            
+
             
             int timeout = g_epoll_max_timeout;
             epoll_event result_events[g_epoll_max_events];
 
-            DEBUGLOG("now begin to epoll_wait");
+            // DEBUGLOG("now begin to epoll_wait");
 
             int rt = epoll_wait(m_epoll_fd, result_events, g_epoll_max_events, timeout);
 
-            DEBUGLOG("now end to epoll_wait,rt = [%d]",rt);
+            // DEBUGLOG("now end to epoll_wait,rt = [%d]",rt);
 
             if(rt < 0){
                 ERRORLOG("epoll_wait error,error =[%d]",errno);
