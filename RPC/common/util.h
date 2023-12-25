@@ -8,6 +8,8 @@ namespace RPC{
     pid_t getPId();
     
     pid_t getThreadId();
+
+    int64_t getNowMs();
 }
 
 #endif

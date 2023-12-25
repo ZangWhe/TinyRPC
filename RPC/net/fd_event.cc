@@ -5,12 +5,15 @@
 #include "RPC/net/fd_event.h"
 #include "RPC/common/log.h"
 
-namespace RPC
-{
+namespace RPC{
     FdEvent::FdEvent(int fd):m_fd(fd){
         memset(&m_listen_events,0,sizeof(m_listen_events));
         
     }
+    FdEvent::FdEvent() {
+        memset(&m_listen_events, 0, sizeof(m_listen_events));
+    }
+
     FdEvent::~FdEvent(){
 
     }

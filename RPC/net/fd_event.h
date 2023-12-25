@@ -4,6 +4,8 @@
 #include <functional>
 #include <sys/epoll.h>
 
+
+
 namespace RPC{
     class FdEvent{
         public:
@@ -14,6 +16,7 @@ namespace RPC{
                 
             };
             FdEvent(int fd);
+            FdEvent();
             ~FdEvent();
             
             std::function<void()> handler(TriggerEvent event_type);

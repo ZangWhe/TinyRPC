@@ -1,6 +1,8 @@
 #include<sys/types.h>
 #include<unistd.h>
 #include<sys/syscall.h>
+#include<sys/time.h>
+
 
 #include "util.h"
 
@@ -21,5 +23,12 @@ namespace RPC{
             t_thread_id = syscall(SYS_gettid);
         }
         return t_thread_id;
+    }
+    
+    // 返回当前毫秒数
+    int64_t getNowMs(){
+        timeval val;
+        gettimeofday(&val,NULL);
+        return val.tv_sec*1000 + val.tv_usec/1000;
     }
 }

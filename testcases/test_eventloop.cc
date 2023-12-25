@@ -4,12 +4,13 @@
 #include<arpa/inet.h>
 #include<string.h>
 #include<unistd.h>
+#include<memory>
 
-#include "../RPC/common/log.h"
-#include "../RPC/common/config.h"
-#include "../RPC/net/fd_event.h"
-#include "../RPC/net/eventloop.h"
-
+#include "RPC/common/log.h"
+#include "RPC/common/config.h"
+#include "RPC/net/fd_event.h"
+#include "RPC/net/eventloop.h"
+#include "RPC/net/timer_event.h"
 
 int main(){
 	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
@@ -54,7 +55,13 @@ int main(){
     });
 
     eventloop->addEpollEvent(&event);
-
+    int i = 0;
+    RPC::TimerEvent::s_ptr timer_event = std::make_shared<RPC::TimerEvent>(
+        1000, true, [&i](){
+            INFOLOG("trigger timer event,count = %d",i++);
+        }
+    );
+    eventloop->addTimerEvent(timer_event);
     eventloop->loop();
 	return 0;
 }

@@ -61,7 +61,7 @@ namespace RPC{
         }
         INFOLOG("Start InitWakeFdEvent");
         initWakeupFdEvent();
-
+        initTimer();
         // epoll_event event;
         // event.events = EPOLLIN;
         // int rt = epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_wakeup_fd, &event);
@@ -78,6 +78,10 @@ namespace RPC{
         if(m_wakeup_fd_event){
             delete m_wakeup_fd_event;
             m_wakeup_fd_event = nullptr;
+        }
+        if(m_timer){
+            delete m_timer;
+            m_timer = nullptr;
         }
     }
     void EventLoop::initWakeupFdEvent(){
@@ -100,6 +104,17 @@ namespace RPC{
 
         addEpollEvent(m_wakeup_fd_event);
     }
+
+    void EventLoop::initTimer(){
+        m_timer = new Timer();
+        addEpollEvent(m_timer);
+    }
+
+    void EventLoop::addTimerEvent(TimerEvent::s_ptr event){
+        m_timer->addTimerEvent(event);
+
+    }
+
     void EventLoop::loop(){
         
         while(!m_stop_flag){
@@ -120,7 +135,7 @@ namespace RPC{
             }
 
             // 存在定时任务就执行
-            
+            // 
 
             
             int timeout = g_epoll_max_timeout;

@@ -14,6 +14,7 @@
 #include "RPC/common/mutex.h"
 #include "RPC/net/fd_event.h"
 #include "RPC/net/wakeup_fd_event.h"
+#include "RPC/net/timer.h"
 
 namespace RPC{
 
@@ -38,10 +39,13 @@ namespace RPC{
 
             void addTask(std::function<void()> cb,bool is_wake_up = false);
 
+            void addTimerEvent(TimerEvent::s_ptr event);
         private:
             void dealWakeup();
 
             void initWakeupFdEvent();
+
+            void initTimer();
             
         private:
             pid_t m_thread_id{0};
@@ -60,6 +64,7 @@ namespace RPC{
 
             Mutex m_mutex;
 
+            Timer* m_timer{NULL};
 
             
     };
