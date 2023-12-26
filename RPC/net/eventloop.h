@@ -18,7 +18,6 @@
 
 namespace RPC{
 
-
     class EventLoop{
 
         public:
