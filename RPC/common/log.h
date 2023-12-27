@@ -20,7 +20,7 @@ namespace RPC{
 
         
         
-        int size = snprintf(nullptr, 0, str, args...);
+        size_t size = snprintf(nullptr, 0, str, args...);
         
         std::string result;
         if (size > 0) {
