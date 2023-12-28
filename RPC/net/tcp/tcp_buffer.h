@@ -35,6 +35,8 @@ namespace RPC{
 
             void moveWriteIndex(int size);
 
+        
+
         private:
             int32_t m_read_index {0};
             int32_t m_write_index {0};

@@ -6,20 +6,20 @@
 #include<memory>
 #include<string>
 #include<iostream>
+#include<sstream>
 
 #include "config.h"
 #include "mutex.h"
 
-
+#pragma GCC diagnostic ignored "-Wformat-security"
 
 
 namespace RPC{
     
+
     template<typename... Args>
     std::string formatString(const char* str,Args&&... args) {
 
-        
-        
         size_t size = snprintf(nullptr, 0, str, args...);
         
         std::string result;
@@ -31,6 +31,9 @@ namespace RPC{
 
         return result;
     }
+    
+
+
 
     #define DEBUGLOG(str, ...)                                                                                                  \
     if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)                                                             \
@@ -72,6 +75,8 @@ namespace RPC{
         Info = 2,
         Error = 3
     };
+
+    
 
     
     // 日志级别转字符串

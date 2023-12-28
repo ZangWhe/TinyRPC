@@ -19,7 +19,7 @@ namespace RPC{
             return ;
         }
         m_ip = addr.substr(0,idx);
-        m_port - std::atoi(addr.substr(idx+1,addr.size() - idx - 1).c_str());
+        m_port = std::atoi(addr.substr(idx+1,addr.size() - idx - 1).c_str());
 
         memset(&m_addr, 0, sizeof(m_addr));
         m_addr.sin_family = AF_INET;

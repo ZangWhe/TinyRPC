@@ -14,6 +14,8 @@
 
 namespace RPC{
 
+    
+
     std::string LogLevelToString(LogLevel level){
         switch (level)
         {

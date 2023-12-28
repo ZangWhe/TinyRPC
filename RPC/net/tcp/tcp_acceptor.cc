@@ -59,9 +59,16 @@ namespace RPC{
             }
 
             IPNetAddr peer_addr = (client_addr);
-            INFOLOG("A client has accepted successfully, peer addr [%s]",peer_addr.toString());
+            INFOLOG("A client has accepted successfully, peer addr [%s]",peer_addr.toString().c_str());
 
             return client_fd;
+        }else{
+            return -1;
         }
     }
+    
+    int TcpAcceptor::getListenfd(){
+        return m_listenfd;
+    }
+    
 }

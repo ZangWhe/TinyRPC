@@ -6,12 +6,16 @@ PATH_BIN = bin
 PATH_LIB = lib
 PATH_OBJ = obj
 
+
 PATH_TinyRPC = RPC
 PATH_COMM = $(PATH_TinyRPC)/common
 PATH_NET = $(PATH_TinyRPC)/net
 PATH_TCP = $(PATH_TinyRPC)/net/tcp
 PATH_CODER = $(PATH_TinyRPC)/net/coder
 PATH_RPC = $(PATH_TinyRPC)/net/rpc
+
+
+
 
 PATH_TESTCASES = testcases
 
@@ -28,14 +32,14 @@ PATH_INSTALL_INC_CODER = $(PATH_INSTALL_INC_ROOT)/$(PATH_CODER)
 PATH_INSTALL_INC_RPC = $(PATH_INSTALL_INC_ROOT)/$(PATH_RPC)
 
 
+
+
 PATH_PROTOBUF = /usr/include/google
 PATH_TINYXML = /usr/include/tinyxml
 
 
 
 CXX := g++
-
-
 
 CXXFLAGS += -g -O0 -std=c++11 -Wall -Wno-deprecated -Wno-unused-but-set-variable
 
@@ -112,13 +116,14 @@ clean :
 
 # install
 install:
-	mkdir -p $(PATH_INSTALL_INC_COMM) $(PATH_INSTALL_INC_NET) $(PATH_INSTALL_INC_TCP) $(PATH_INSTALL_INC_CODER) $(PATH_INSTALL_INC_RPC)\
+	mkdir -p $(PATH_INSTALL_INC_COMM) $(PATH_INSTALL_INC_NET) $(PATH_INSTALL_INC_TCP) $(PATH_INSTALL_INC_CODER) $(PATH_INSTALL_INC_RPC) \
 		&& cp $(PATH_COMM)/*.h $(PATH_INSTALL_INC_COMM) \
 		&& cp $(PATH_NET)/*.h $(PATH_INSTALL_INC_NET) \
 		&& cp $(PATH_TCP)/*.h $(PATH_INSTALL_INC_TCP) \
 		&& cp $(PATH_CODER)/*.h $(PATH_INSTALL_INC_CODER) \
 		&& cp $(PATH_RPC)/*.h $(PATH_INSTALL_INC_RPC) \
 		&& cp $(LIB_OUT) $(PATH_INSTALL_LIB_ROOT)/
+		
 
 
 # uninstall
