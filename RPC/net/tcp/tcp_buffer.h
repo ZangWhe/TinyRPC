@@ -2,13 +2,16 @@
 #define RPC_NET_TCP_TCP_BUFFER_H
 
 #include<vector>
-#include<iostream>
+// #include<iostream>
+#include<memory>
 
 
 
 namespace RPC{
     class TcpBuffer{
         public:
+            typedef std::shared_ptr<TcpBuffer> s_ptr;
+
             TcpBuffer(int size);
 
             ~TcpBuffer();
@@ -19,9 +22,9 @@ namespace RPC{
             // 返回可写字节数
             int writeAble();
 
-            int read_index();
+            int readIndex();
 
-            int write_index();
+            int writeIndex();
 
             void writeToBuffer(const char* buf, int size);
 
@@ -42,6 +45,7 @@ namespace RPC{
             int32_t m_write_index {0};
             int32_t m_size {0};
             
+        public:
             std::vector<char> m_buffer;
     };
 }

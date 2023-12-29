@@ -3,6 +3,7 @@
 #include "RPC/net/eventloop.h"
 #include "RPC/net/fd_event.h"
 #include "RPC/net/io_thread_group.h"
+#include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/common/log.h"
 
 namespace RPC{
@@ -25,7 +26,7 @@ namespace RPC{
     void TcpServer::init(){
         m_acceptor = std::make_shared<TcpAcceptor>(m_local_addr);
 
-        m_main_event_loop = EventLoop::getCurrentEventLoop();
+        m_main_event_loop = EventLoop::GetCurrentEventLoop();
 
         m_io_thread_group = new IOThreadGroup(2);
         INFOLOG("the subReactor size is 2");
@@ -38,13 +39,17 @@ namespace RPC{
     }
 
     void TcpServer::onAccept(){
-        int client_fd = m_acceptor->accept();
-        // FdEvent client_fd_event(client_fd);
+        auto re = m_acceptor->accept();
+        int client_fd = re.first;
+        NetAddr::s_ptr peer_addr = re.second;
+        
         m_client_counts++;
 
-        // TODO: 把client_fd添加到任意IO线程中
-        // m_io_thread_group->getIOThread()->getEventLoop()->addEpollEvent();
-
+        // 把client_fd添加到任意IO线程中
+        IOThread* io_thread = m_io_thread_group->getIOThread();
+        TcpConnection::s_ptr connection = std::make_shared<TcpConnection>(io_thread, client_fd, 128, peer_addr);
+        connection->setState(Connected);
+        m_client.insert(connection);
         INFOLOG("TcpServer success get client, fd = %d",client_fd);
     }
     

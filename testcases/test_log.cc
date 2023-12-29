@@ -1,6 +1,6 @@
 #include<stdio.h>
-#include "../RPC/common/log.h"
-#include "../RPC/common/config.h"
+#include "RPC/common/log.h"
+#include "RPC/common/config.h"
 
 #include<pthread.h>
 void* func(void*){

@@ -41,7 +41,7 @@ namespace RPC{
             void addTimerEvent(TimerEvent::s_ptr event);
 
         public:
-            static EventLoop* getCurrentEventLoop();
+            static EventLoop* GetCurrentEventLoop();
 
         private:
             void dealWakeup();

@@ -39,7 +39,8 @@ namespace RPC{
     if(rt == -1){                                                                                                           \
         ERRORLOG("faild epoll_ctl when add fd : %d , errno = %d, error info = %s",event->getFd(),errno,strerror(errno));    \
     }                                                                                                                       \
-    DEBUGLOG("success to delete event,fd [%d]",event->getFd());                                                              \
+    m_listen_fds.erase(event->getFd());                                                                                     \
+    DEBUGLOG("success to delete event,fd [%d]",event->getFd());                                                             \
 
     // 当前循环
     static thread_local EventLoop* t_current_eventloop = NULL;
@@ -218,7 +219,7 @@ namespace RPC{
         }
     }
 
-    EventLoop* EventLoop::getCurrentEventLoop(){
+    EventLoop* EventLoop::GetCurrentEventLoop(){
         if(!t_current_eventloop){
             t_current_eventloop = new EventLoop();
         }

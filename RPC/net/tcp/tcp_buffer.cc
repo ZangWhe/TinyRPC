@@ -23,11 +23,11 @@ namespace RPC{
                 return m_buffer.size() - m_write_index;
             }
 
-            int TcpBuffer::read_index(){
+            int TcpBuffer::readIndex(){
                 return m_read_index;
             }
 
-            int TcpBuffer::write_index(){
+            int TcpBuffer::writeIndex(){
                 return m_write_index;
             }
 
@@ -38,6 +38,7 @@ namespace RPC{
                     resizeBuffer(new_size);
                 }
                 memcpy(&m_buffer[m_write_index], buf, size);
+                m_write_index += size;
             }
 
             void TcpBuffer::readFromBuffer(std::vector<char>& readbuf, int size){

@@ -15,13 +15,20 @@ namespace RPC{
                 OUT_EVENT = EPOLLOUT
                 
             };
+
             FdEvent(int fd);
+
             FdEvent();
+
             ~FdEvent();
+
+            void setNonBlock(); // 设置非阻塞
             
             std::function<void()> handler(TriggerEvent event_type);
 
             void listen(TriggerEvent event_type,std::function<void()> callback);
+
+            void cancle(TriggerEvent event_type);   // 取消监听
 
             int getFd() const{
                 return m_fd;
