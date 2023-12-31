@@ -117,7 +117,7 @@ namespace RPC{
     }
 
     void EventLoop::loop(){
-        
+        m_is_looping = true;
         while(!m_stop_flag){
             
             // 加锁
@@ -219,10 +219,16 @@ namespace RPC{
         }
     }
 
+    bool EventLoop::isLooping(){
+        return m_is_looping;
+    }
+
     EventLoop* EventLoop::GetCurrentEventLoop(){
         if(!t_current_eventloop){
             t_current_eventloop = new EventLoop();
         }
         return t_current_eventloop;
     }
+
+    
 }

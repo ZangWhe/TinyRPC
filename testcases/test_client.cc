@@ -9,9 +9,11 @@
 #include<memory>
 #include<unistd.h>
 
+
+#include "RPC/net/tcp/tcp_client.h"
 #include "RPC/common/log.h"
 #include "RPC/common/config.h"
-
+#include "RPC/net/tcp/net_addr.h"
 void test_connect(){
     // 调用connect 连接server
     // write一个字符串
@@ -40,15 +42,22 @@ void test_connect(){
     
     DEBUGLOG("success read %d bytes, [%s]", rt, std::string(buf).c_str());
     
-    
+}
 
+void test_tcp_client(){
+    RPC::IPNetAddr::s_ptr addr = std::make_shared<RPC::IPNetAddr>("127.0.0.1",12345);
+    RPC::TcpClient client(addr);
+
+    client.connect([addr](){
+        DEBUGLOG("connect to [%s] success",addr->toString().c_str());
+    });
 }
 
 int main(){
 	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
 	RPC::Logger::InitGlobalLogger();
 	
-    test_connect();
-
+    // test_connect();
+    test_tcp_client();
 	return 0;
 }

@@ -38,7 +38,7 @@ namespace RPC{
     #define DEBUGLOG(str, ...)                                                                                                  \
     if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Debug)                                                             \
     {                                                                                                                           \
-    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Debug))->toString())                            \
+    RPC::Logger::GetGlobalLogger()->pushLog( (RPC::LogEvent(RPC::LogLevel::Debug).toString())                                   \
     + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
     RPC::Logger::GetGlobalLogger()->log();                                                                                      \
     }                                                                                                                           \
@@ -46,7 +46,7 @@ namespace RPC{
     #define INFOLOG(str, ...)                                                                                                   \
     if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Info)                                                              \
     {                                                                                                                           \
-    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Info))->toString())                             \
+    RPC::Logger::GetGlobalLogger()->pushLog( (RPC::LogEvent(RPC::LogLevel::Info).toString())                                    \
     + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
     RPC::Logger::GetGlobalLogger()->log();                                                                                      \
     }                                                                                                                           \
@@ -55,7 +55,7 @@ namespace RPC{
     #define ERRORLOG(str, ...)                                                                                                  \
     if(RPC::Logger::GetGlobalLogger()->getLogLevel() <= RPC::Error)                                                             \
     {                                                                                                                           \
-    RPC::Logger::GetGlobalLogger()->pushLog( ((new RPC::LogEvent(RPC::LogLevel::Error))->toString())                            \
+    RPC::Logger::GetGlobalLogger()->pushLog( (RPC::LogEvent(RPC::LogLevel::Error).toString())                                   \
     + "[" + std::string(__FILE__) + " : " + std::to_string(__LINE__) + "]\t" + RPC::formatString(str,##__VA_ARGS__) + '\n');    \
     RPC::Logger::GetGlobalLogger()->log();                                                                                      \
     }                                                                                                                           \

@@ -6,8 +6,8 @@
 
 namespace RPC{
     
-    TcpConnection::TcpConnection(IOThread* io_thread, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
-    : m_io_thread(io_thread), m_peer_addr(peer_addr), m_state(NotConnected), m_fd(fd){
+    TcpConnection::TcpConnection(EventLoop* event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
+    : m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(NotConnected), m_fd(fd){
         m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
         m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
 
@@ -15,7 +15,7 @@ namespace RPC{
         m_fd_event->setNonBlock();
         m_fd_event->listen(FdEvent::IN_EVENT, std::bind(&TcpConnection::onRead,this));
 
-        io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+        m_event_loop->addEpollEvent(m_fd_event);
 
     }
 
@@ -76,19 +76,20 @@ namespace RPC{
         int size = m_in_buffer->readAble();
         tmp_buffer.resize(size);
 
-        std::string msg  = "Hello Zhe Fuck";
-        // for(int i=0; i<size; ++i){
-        //     msg += tmp_buffer[i];
-        // }
-
         m_in_buffer->readFromBuffer(tmp_buffer,size);
+
+        std::string msg  = "";
+        for(int i=0; i<size; ++i){
+            msg += tmp_buffer[i];
+        }
+
         INFOLOG("success get request [%s] from client [%s]",msg.c_str(), m_peer_addr->toString().c_str());
         
         m_out_buffer->writeToBuffer(msg.c_str(),msg.length());
 
         m_fd_event->listen(FdEvent::OUT_EVENT, std::bind(&TcpConnection::onWrite,this));
 
-        m_io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+        m_event_loop->addEpollEvent(m_fd_event);
     }
 
     void TcpConnection::onWrite(){
@@ -122,7 +123,7 @@ namespace RPC{
         }
         if(is_write_all){
             m_fd_event->cancle(FdEvent::OUT_EVENT);
-            m_io_thread->getEventLoop()->addEpollEvent(m_fd_event);
+            m_event_loop->addEpollEvent(m_fd_event);
         }
     }
 
@@ -139,8 +140,10 @@ namespace RPC{
         if(m_state == Closed){
             return ;
         }
+        m_fd_event->cancle(FdEvent::IN_EVENT);
+        m_fd_event->cancle(FdEvent::OUT_EVENT);
 
-        m_io_thread->getEventLoop()->deleteEpollEvent(m_fd_event);
+        m_event_loop->deleteEpollEvent(m_fd_event);
 
         m_state = Closed;
     }
@@ -156,5 +159,9 @@ namespace RPC{
         // 发送FIN报文，触发四次挥手的第一个阶段
         // 当fd 发生可读事件，但是可读的数据为0,即对方也发送了一个FIN
         ::shutdown(m_fd,SHUT_RDWR);
+    }
+
+    void TcpConnection::setConnectionType(TcpConnectionType type){
+        m_connection_type = type;
     }
 }
