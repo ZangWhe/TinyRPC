@@ -14,6 +14,9 @@
 #include "RPC/common/log.h"
 #include "RPC/common/config.h"
 #include "RPC/net/tcp/net_addr.h"
+#include "RPC/net/string_coder.h"
+#include "RPC/net/abstract_protocol.h"
+
 void test_connect(){
     // 调用connect 连接server
     // write一个字符串
@@ -48,8 +51,23 @@ void test_tcp_client(){
     RPC::IPNetAddr::s_ptr addr = std::make_shared<RPC::IPNetAddr>("127.0.0.1",12345);
     RPC::TcpClient client(addr);
 
-    client.connect([addr](){
+    client.connect([addr, &client](){
         DEBUGLOG("connect to [%s] success",addr->toString().c_str());
+        std::shared_ptr<RPC::StringProtocol> message = std::make_shared<RPC::StringProtocol>();
+        message->info = "Hello Fuck Wang";
+        message->setReqId("123456");
+        client.writeMessage(message, [](RPC::AbstractProtocol::s_ptr msg_ptr){
+            DEBUGLOG("send message success");
+        });
+
+        client.readMessage("123456", [](RPC::AbstractProtocol::s_ptr msg_ptr){
+            std::shared_ptr<RPC::StringProtocol> message_ptr = std::dynamic_pointer_cast<RPC::StringProtocol>(msg_ptr);
+            DEBUGLOG("seq_id [%s] get response [%s] success", message_ptr->getReqId().c_str(),message_ptr->info.c_str());
+        });
+
+        client.writeMessage(message, [](RPC::AbstractProtocol::s_ptr msg_ptr){
+            DEBUGLOG("send message 2222222 success");
+        });
     });
 }
 

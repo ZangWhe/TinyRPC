@@ -135,9 +135,6 @@ namespace RPC{
                 }
             }
 
-            // 存在定时任务就执行
-            // 
-
             
             int timeout = g_epoll_max_timeout;
             epoll_event result_events[g_epoll_max_events];

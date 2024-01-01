@@ -20,7 +20,7 @@ namespace RPC{
         m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(m_fd);
         m_fd_event->setNonBlock();
 
-        m_connection = std::make_shared<TcpConnection>(m_event_loop, m_fd, 128, m_peer_addr);
+        m_connection = std::make_shared<TcpConnection>(m_event_loop, m_fd, 128, m_peer_addr, TcpConnectionByClient);
 
         m_connection->setConnectionType(TcpConnectionByClient);
 
@@ -46,17 +46,23 @@ namespace RPC{
                     int error = 0;
                     socklen_t error_len = sizeof(error);
                     getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &error_len);
+                    bool is_connect_success = false;
                     if(error == 0){
                         DEBUGLOG("connect [%s] success", m_peer_addr->toString().c_str());
-                        if(done){
-                            done();
-                        }
+                        is_connect_success = true;
+                        m_connection->setState(TcpState::Connected); 
                     }else{
                         ERRORLOG("connect [%s] error, errno = %d, error = %s", m_peer_addr->toString().c_str(), errno, strerror(errno));
                     }
                     // 连接后需去掉可写事件的监听，不然会一直触发
                     m_fd_event->cancle(FdEvent::OUT_EVENT);
                     m_event_loop->addEpollEvent(m_fd_event);
+
+                    // 如果连接成功，才会执行回调函数
+                    if(is_connect_success && done){
+                        done();
+                        
+                    }
                 });
                 m_event_loop->addEpollEvent(m_fd_event);
                 if(!m_event_loop->isLooping()){
@@ -69,11 +75,17 @@ namespace RPC{
         }
     }
 
-    void TcpClient::writeMessage(AbstractProtocol::s_ptr request, std::function<void(AbstractProtocol::s_ptr)> done){
-
+    void TcpClient::writeMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done){
+        // 1. 把message对象写入到TcpConnection的buffer中,回调函数也写入
+        // 2. 启动connection可写事件监听
+        m_connection->pushSendMessage(message, done);
+        m_connection->listenWrite();
     }
 
-    void TcpClient::readMessage(AbstractProtocol::s_ptr request, std::function<void(AbstractProtocol::s_ptr)> done){
-
+    void TcpClient::readMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done){
+        // 1. 监听可读事件
+        // 2. 从buffer里decode得到message对象，判断与req_id是否相等，相等则读成功，执行回调函数
+        m_connection->pushReadMessage(req_id, done);
+        m_connection->listenRead();
     }
 }
