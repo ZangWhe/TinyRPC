@@ -3,7 +3,7 @@
 #include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/net/fd_event_group.h"
 #include "RPC/common/log.h"
-#include "RPC/net/string_coder.h"
+#include "RPC/net/coder/string_coder.h"
 
 namespace RPC{
     
@@ -105,7 +105,7 @@ namespace RPC{
             m_coder->decode(result,m_in_buffer);
             DEBUGLOG("result's size is [%d]", result.size());
             for(size_t i=0;i<result.size();i++){
-                std::string req_id = result[i]->getReqId();
+                std::string req_id = result[i]->m_msg_id;
                 auto it =m_read_dones.find(req_id);
                 if(it != m_read_dones.end()){
                     it->second(result[i]);

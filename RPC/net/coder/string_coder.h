@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "RPC/net/abstract_coder.h"
-#include "RPC/net/abstract_protocol.h"
+#include "RPC/net/coder/abstract_coder.h"
+#include "RPC/net/coder/abstract_protocol.h"
 
 namespace RPC{
 
@@ -33,7 +33,7 @@ namespace RPC{
 
                 std::shared_ptr<StringProtocol> msg = std::make_shared<StringProtocol>();
                 msg->info = info;
-                msg->setReqId("123456");
+                msg->m_msg_id = "123456";
                 out_messages.push_back(msg);
             }
 

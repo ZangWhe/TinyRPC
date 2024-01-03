@@ -15,9 +15,7 @@ void test_tcp_server(){
 int main(){
 	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
 	RPC::Logger::InitGlobalLogger();
-	
+
     test_tcp_server();
-
-
 	return 0;
 }

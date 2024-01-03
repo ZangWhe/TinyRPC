@@ -45,7 +45,7 @@ CXXFLAGS += -g -O0 -std=c++11 -Wall -Wno-deprecated -Wno-unused-but-set-variable
 
 
 # CXXFLAGS += -I./ -I$(PATH_TinyRPC)	-I $(PATH_COMM) -I $(PATH_NET) -I $(PATH_TCP) -I $(PATH_CODER) -I $(PATH_RPC)
-CXXFLAGS += -I ./ -I$(PATH_TinyRPC)	-I$(PATH_COMM) -I$(PATH_NET) -I$(PATH_TCP)
+CXXFLAGS += -I ./ -I$(PATH_TinyRPC)	-I$(PATH_COMM) -I$(PATH_NET) -I$(PATH_TCP) -I$(PATH_CODER)
 
 LIBS += /usr/lib/libprotobuf.a	/usr/lib/libtinyxml.a
 
@@ -99,8 +99,8 @@ $(PATH_OBJ)/%.o : $(PATH_NET)/%.cc
 $(PATH_OBJ)/%.o : $(PATH_TCP)/%.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# $(PATH_OBJ)/%.o : $(PATH_CODER)/%.cc
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(PATH_OBJ)/%.o : $(PATH_CODER)/%.cc
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # $(PATH_OBJ)/%.o : $(PATH_RPC)/%.cc
 # 	$(CXX) $(CXXFLAGS) -c $< -o $@
