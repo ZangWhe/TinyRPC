@@ -4,6 +4,8 @@
 #include "RPC/net/fd_event_group.h"
 #include "RPC/common/log.h"
 #include "RPC/net/coder/string_coder.h"
+#include "RPC/net/coder/tinypb_coder.h"
+#include "RPC/net/coder/tinypb_protocol.h"
 
 namespace RPC{
     
@@ -16,7 +18,7 @@ namespace RPC{
         m_fd_event->setNonBlock();
         
 
-        m_coder = new StringCoder();
+        m_coder = new TinyPBCoder();
 
         if(m_connection_type == TcpConnectionByServer){
             listenRead();
@@ -84,29 +86,29 @@ namespace RPC{
 
         if(m_connection_type == TcpConnectionByServer){
             // 将RPC请求执行业务逻辑，获取RPC相应，再把RPC响应发送回去
-            std::vector<char> tmp_buffer;
-            int size = m_in_buffer->readAble();
-            tmp_buffer.resize(size);
 
-            m_in_buffer->readFromBuffer(tmp_buffer,size);
-
-            std::string msg  = "";
-            for(int i=0; i<size; ++i){
-                msg += tmp_buffer[i];
+            std::vector<AbstractProtocol::s_ptr> result;
+            std::vector<AbstractProtocol::s_ptr> replay_message;
+            m_coder->decode(result, m_in_buffer);
+            for(size_t i = 0; i < result.size(); i++){
+                // 1. 针对每一个请求，调用RPC发方法，获取响应message
+                // 2. 将响应message 放入到发送缓冲区中，监听可写时间回包
+                INFOLOG("success get request [%s] from client [%s]",result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
+                std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
+                message->m_pb_data = "Hello !!! This is RPC test data";
+                message->m_msg_id = result[i]->m_msg_id;
+                replay_message.emplace_back(message);
             }
-
-            INFOLOG("success get request [%s] from client [%s]",msg.c_str(), m_peer_addr->toString().c_str());
-            
-            m_out_buffer->writeToBuffer(msg.c_str(),msg.length());
-
+            m_coder->encode(replay_message, m_out_buffer);
             listenWrite();
+  
         }else if(m_connection_type == TcpConnectionByClient){
             std::vector<AbstractProtocol::s_ptr> result;
             m_coder->decode(result,m_in_buffer);
             DEBUGLOG("result's size is [%d]", result.size());
             for(size_t i=0;i<result.size();i++){
-                std::string req_id = result[i]->m_msg_id;
-                auto it =m_read_dones.find(req_id);
+                std::string msg_id = result[i]->m_msg_id;
+                auto it =m_read_dones.find(msg_id);
                 if(it != m_read_dones.end()){
                     it->second(result[i]);
                 }

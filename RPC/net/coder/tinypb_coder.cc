@@ -1,6 +1,7 @@
 #include <memory>
 #include <vector>
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "RPC/net/coder/tinypb_coder.h"
 #include "RPC/net/coder/tinypb_protocol.h"
@@ -8,8 +9,30 @@
 #include "RPC/common/log.h"
 
 namespace RPC{
+    TinyPBCoder::TinyPBCoder(){
+
+    }
+            
+    TinyPBCoder::~TinyPBCoder(){
+
+    }
     
     void TinyPBCoder::encode(std::vector<AbstractProtocol::s_ptr>& messages, TcpBuffer::s_ptr out_buffer){
+        for(auto &m : messages){
+            std::shared_ptr<TinyPBProtocol> msg = std::dynamic_pointer_cast<TinyPBProtocol>(m);
+            // int len = 0;
+            auto re = encodeTinyPB(msg);
+            const char* buffer = re.first;
+            int len = re.second;
+            if(buffer != NULL && len > 0){
+                out_buffer->writeToBuffer(buffer, len);
+            }
+            if(buffer){
+                free((void*)buffer);
+                buffer = NULL;
+            }
+        }
+
 
     }
 
@@ -129,5 +152,92 @@ namespace RPC{
                 out_messages.push_back(message);
             }
         }
+    }
+
+    std::pair<const char*,int> TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message){
+        if(message->m_msg_id.empty()){
+            message->m_msg_id = "123456789";
+        }
+        DEBUGLOG("msg_id = %s", message->m_msg_id.c_str());
+        int pack_len = 2 + 24 + message->m_msg_id.length() + message->m_method_name.length() + message->m_err_info.length() + message->m_pb_data.length();
+        DEBUGLOG("pack_len = %d", pack_len);
+
+        char* buffer = reinterpret_cast<char*>(malloc(pack_len));
+        char* tmp = buffer;
+
+        // start
+        *tmp = TinyPBProtocol::PB_START;
+        tmp++;
+
+        // package length
+        int32_t pack_len_net = htonl(pack_len);
+        memcpy(tmp,&pack_len_net,sizeof(pack_len_net));
+        tmp += sizeof(pack_len_net);
+
+        // msg id lengh
+        int msg_id_len = message->m_msg_id.length();
+        int32_t msg_id_len_net = htonl(msg_id_len);
+        memcpy(tmp,&msg_id_len_net,sizeof(msg_id_len_net));
+        tmp += sizeof(msg_id_len_net);
+
+        // msg id
+        if(!message->m_msg_id.empty()){
+            memcpy(tmp, &(message->m_msg_id[0]),msg_id_len);
+            tmp += msg_id_len;
+        }
+
+        // method name length
+        int method_name_len = message->m_method_name.length();
+        int32_t method_name_len_net = htonl(method_name_len);
+        memcpy(tmp,&method_name_len_net,sizeof(method_name_len_net));
+        tmp += sizeof(method_name_len_net);
+
+        // method name
+        if(!message->m_method_name.empty()){
+            memcpy(tmp, &(message->m_method_name[0]),method_name_len);
+            tmp += method_name_len;
+        }
+
+        // error code
+        int32_t err_code_net = htonl(message->m_err_code);
+        memcpy(tmp,&err_code_net,sizeof(err_code_net));
+        tmp += sizeof(err_code_net);
+
+        // error info length
+        int error_info_len = message->m_err_info.length();
+        int32_t error_info_len_net = htonl(error_info_len);
+        memcpy(tmp,&error_info_len_net,sizeof(error_info_len_net));
+        tmp += sizeof(error_info_len_net);
+
+        // error info
+        if(!message->m_err_info.empty()){
+            memcpy(tmp, &(message->m_err_info[0]),error_info_len);
+            tmp += error_info_len;
+        }
+
+        // pb data
+        if(!message->m_pb_data.empty()){
+            memcpy(tmp, &(message->m_pb_data[0]),message->m_pb_data.length());
+            tmp += message->m_pb_data.length();
+        }
+
+        // check code
+        int32_t check_code_net = htonl(1);
+        memcpy(tmp,&check_code_net,sizeof(check_code_net));
+        tmp += sizeof(check_code_net);
+
+        // end
+        *tmp = TinyPBProtocol::PB_END;
+        // tmp++;
+
+        message->m_pack_len = pack_len;
+        message->m_msg_id_len = msg_id_len;
+        message->m_method_name_len = method_name_len;
+        message->m_err_info_len = error_info_len;
+        message->parse_success = true;
+
+        DEBUGLOG("encode message [%s] success", message->m_msg_id.c_str());
+
+        return std::make_pair(buffer,pack_len);
     }
 }

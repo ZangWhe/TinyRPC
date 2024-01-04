@@ -16,6 +16,8 @@
 #include "RPC/net/tcp/net_addr.h"
 #include "RPC/net/coder/string_coder.h"
 #include "RPC/net/coder/abstract_protocol.h"
+#include "RPC/net/coder/tinypb_coder.h"
+#include "RPC/net/coder/tinypb_protocol.h"
 
 void test_connect(){
     // 调用connect 连接server
@@ -53,21 +55,18 @@ void test_tcp_client(){
 
     client.connect([addr, &client](){
         DEBUGLOG("connect to [%s] success",addr->toString().c_str());
-        std::shared_ptr<RPC::StringProtocol> message = std::make_shared<RPC::StringProtocol>();
-        message->info = "Hello Fuck Wang";
-        message->m_msg_id = "123456";
+        std::shared_ptr<RPC::TinyPBProtocol> message = std::make_shared<RPC::TinyPBProtocol>();
+        message->m_pb_data = "test pb data wang !!!";
+        message->m_msg_id = "123456789";
         client.writeMessage(message, [](RPC::AbstractProtocol::s_ptr msg_ptr){
             DEBUGLOG("send message success");
         });
 
-        client.readMessage("123456", [](RPC::AbstractProtocol::s_ptr msg_ptr){
-            std::shared_ptr<RPC::StringProtocol> message_ptr = std::dynamic_pointer_cast<RPC::StringProtocol>(msg_ptr);
-            DEBUGLOG("seq_id [%s] get response [%s] success", message_ptr->m_msg_id.c_str(),message_ptr->info.c_str());
+        client.readMessage("123456789", [](RPC::AbstractProtocol::s_ptr msg_ptr){
+            std::shared_ptr<RPC::TinyPBProtocol> message_ptr = std::dynamic_pointer_cast<RPC::TinyPBProtocol>(msg_ptr);
+            DEBUGLOG("msg_id [%s] get response [%s] success", message_ptr->m_msg_id.c_str(),message_ptr->m_pb_data.c_str());
         });
 
-        client.writeMessage(message, [](RPC::AbstractProtocol::s_ptr msg_ptr){
-            DEBUGLOG("send message 2222222 success");
-        });
     });
 }
 

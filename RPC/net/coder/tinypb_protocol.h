@@ -8,6 +8,10 @@
 namespace RPC{
     struct TinyPBProtocol : public AbstractProtocol{
         public:
+            TinyPBProtocol();
+
+            ~TinyPBProtocol();
+        public:
             // 起始符和结束符
             static char PB_START;
             static char PB_END;
@@ -27,8 +31,7 @@ namespace RPC{
             bool parse_success {false};
     };
 
-    char TinyPBProtocol::PB_START = 0x02;
-    char TinyPBProtocol::PB_END = 0x03;
+    
 }
 
 
