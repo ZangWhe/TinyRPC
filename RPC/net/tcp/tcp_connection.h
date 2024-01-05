@@ -11,6 +11,7 @@
 #include "RPC/net/fd_event.h"
 #include "RPC/net/coder/abstract_protocol.h"
 #include "RPC/net/coder/abstract_coder.h"
+#include "RPC/net/rpc/rpc_dispatcher.h"
 
 namespace RPC{
     enum TcpState{
@@ -83,7 +84,7 @@ namespace RPC{
 
             std::map<std::string, std::function<void(AbstractProtocol::s_ptr)>> m_read_dones;
 
-            
+            std::shared_ptr<RpcDispatcher> m_dispatcher;
 
     };
 }

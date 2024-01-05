@@ -1,4 +1,4 @@
-#include "unistd.h"
+#include <unistd.h>
 
 #include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/net/fd_event_group.h"
@@ -6,6 +6,7 @@
 #include "RPC/net/coder/string_coder.h"
 #include "RPC/net/coder/tinypb_coder.h"
 #include "RPC/net/coder/tinypb_protocol.h"
+
 
 namespace RPC{
     
@@ -22,6 +23,7 @@ namespace RPC{
 
         if(m_connection_type == TcpConnectionByServer){
             listenRead();
+            m_dispatcher = std::make_shared<RpcDispatcher>();
         }
 
     }
@@ -95,8 +97,10 @@ namespace RPC{
                 // 2. 将响应message 放入到发送缓冲区中，监听可写时间回包
                 INFOLOG("success get request [%s] from client [%s]",result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
                 std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
-                message->m_pb_data = "Hello !!! This is RPC test data";
-                message->m_msg_id = result[i]->m_msg_id;
+                // message->m_pb_data = "Hello !!! This is RPC test data";
+                // message->m_msg_id = result[i]->m_msg_id;
+
+                m_dispatcher->dispatch(result[i], message);
                 replay_message.emplace_back(message);
             }
             m_coder->encode(replay_message, m_out_buffer);
