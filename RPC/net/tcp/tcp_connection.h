@@ -29,7 +29,7 @@ namespace RPC{
         public:
             typedef std::shared_ptr<TcpConnection> s_ptr;
         public:
-            TcpConnection(EventLoop* event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type = TcpConnectionByServer);
+            TcpConnection(EventLoop* event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, NetAddr::s_ptr local_addr, TcpConnectionType type = TcpConnectionByServer);
 
             ~TcpConnection();
 
@@ -59,13 +59,16 @@ namespace RPC{
 
             void pushReadMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);
 
+            NetAddr::s_ptr getLocalAddr();
+
+            NetAddr::s_ptr getPeerAddr();
         private:
             // IOThread* m_io_thread {nullptr};    // 持有该连接的IO线程
             EventLoop* m_event_loop {nullptr};
-
-            NetAddr::s_ptr m_local_addr;
-            NetAddr::s_ptr m_peer_addr;
-
+            
+            NetAddr::s_ptr m_peer_addr {nullptr};
+            NetAddr::s_ptr m_local_addr {nullptr};
+            
             TcpBuffer::s_ptr m_in_buffer;   // 接收缓冲区
             TcpBuffer::s_ptr m_out_buffer;  // 发送缓冲区
 

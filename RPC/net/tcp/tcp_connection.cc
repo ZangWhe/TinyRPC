@@ -10,8 +10,8 @@
 
 namespace RPC{
     
-    TcpConnection::TcpConnection(EventLoop* event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, TcpConnectionType type)
-    : m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(NotConnected), m_fd(fd), m_connection_type(type){
+    TcpConnection::TcpConnection(EventLoop* event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, NetAddr::s_ptr local_addr, TcpConnectionType type)
+    : m_event_loop(event_loop), m_peer_addr(peer_addr), m_local_addr(local_addr), m_state(NotConnected), m_fd(fd), m_connection_type(type){
         m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
         m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
 
@@ -100,7 +100,7 @@ namespace RPC{
                 // message->m_pb_data = "Hello !!! This is RPC test data";
                 // message->m_msg_id = result[i]->m_msg_id;
 
-                m_dispatcher->dispatch(result[i], message);
+                m_dispatcher->dispatch(result[i], message, this);
                 replay_message.emplace_back(message);
             }
             m_coder->encode(replay_message, m_out_buffer);
@@ -232,5 +232,13 @@ namespace RPC{
 
     void TcpConnection::pushReadMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done){
         m_read_dones.insert(std::make_pair(req_id,done));
+    }
+
+    NetAddr::s_ptr TcpConnection::getLocalAddr(){
+        return m_local_addr;
+    }
+
+    NetAddr::s_ptr TcpConnection::getPeerAddr(){
+        return m_peer_addr;
     }
 }
