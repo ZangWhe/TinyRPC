@@ -156,7 +156,7 @@ namespace RPC{
 
     std::pair<const char*,int> TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message){
         if(message->m_msg_id.empty()){
-            message->m_msg_id = "123456789";
+            message->m_msg_id = "-1";
         }
         DEBUGLOG("msg_id = %s", message->m_msg_id.c_str());
         int pack_len = 2 + 24 + message->m_msg_id.length() + message->m_method_name.length() + message->m_err_info.length() + message->m_pb_data.length();

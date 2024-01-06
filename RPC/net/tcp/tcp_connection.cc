@@ -23,7 +23,7 @@ namespace RPC{
 
         if(m_connection_type == TcpConnectionByServer){
             listenRead();
-            m_dispatcher = std::make_shared<RpcDispatcher>();
+            // m_dispatcher = std::make_shared<RpcDispatcher>();
         }
 
     }
@@ -80,17 +80,16 @@ namespace RPC{
         if(!is_read_all){
             ERRORLOG("not read all data");
         }
-        // TODO: 简单echo ，后面补充RPC协议解析
         TcpConnection::excute();
     }
 
     void TcpConnection::excute(){
 
         if(m_connection_type == TcpConnectionByServer){
-            // 将RPC请求执行业务逻辑，获取RPC相应，再把RPC响应发送回去
+            // 将RPC请求执行业务逻辑，获取RPC响应，再把RPC响应发送回去
 
             std::vector<AbstractProtocol::s_ptr> result;
-            std::vector<AbstractProtocol::s_ptr> replay_message;
+            std::vector<AbstractProtocol::s_ptr> replay_messages;
             m_coder->decode(result, m_in_buffer);
             for(size_t i = 0; i < result.size(); i++){
                 // 1. 针对每一个请求，调用RPC发方法，获取响应message
@@ -98,12 +97,11 @@ namespace RPC{
                 INFOLOG("success get request [%s] from client [%s]",result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
                 std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
                 // message->m_pb_data = "Hello !!! This is RPC test data";
-                // message->m_msg_id = result[i]->m_msg_id;
-
-                m_dispatcher->dispatch(result[i], message, this);
-                replay_message.emplace_back(message);
+                message->m_msg_id = result[i]->m_msg_id;
+                RpcDispatcher::GetRpcDispatcher()->dispatch(result[i], message, this);
+                replay_messages.emplace_back(message);
             }
-            m_coder->encode(replay_message, m_out_buffer);
+            m_coder->encode(replay_messages, m_out_buffer);
             listenWrite();
   
         }else if(m_connection_type == TcpConnectionByClient){
@@ -137,7 +135,7 @@ namespace RPC{
             std::vector<AbstractProtocol::s_ptr> messages;
             for(size_t i=0; i<m_write_dones.size();i++){
                 messages.emplace_back(m_write_dones[i].first);
-            }         
+            }
             m_coder->encode(messages, m_out_buffer);
 
         }
