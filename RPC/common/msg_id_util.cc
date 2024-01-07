@@ -31,7 +31,7 @@ namespace RPC{
             }
             t_msg_id_no = res;
         }else{
-            int i = t_msg_id_no.length() - 1;
+            size_t i = t_msg_id_no.length() - 1;
             while(i>=0 && t_msg_id_no[i] == '9'){
                 i--;
             }
@@ -40,12 +40,6 @@ namespace RPC{
                 for(size_t j=i+1;j<t_msg_id_no.length();++j){
                     t_msg_id_no[j] = '0';
                 }
-            }else if(i == -1){
-                t_msg_id_no[0] = 1;
-                for(size_t j = 2;j<t_msg_id_no.length();++j){
-                    t_msg_id_no[j] = '0';
-                }
-                t_msg_id_no += '0';
             }
         }
         return t_msg_id_no;
