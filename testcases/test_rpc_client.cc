@@ -67,30 +67,36 @@ void test_tcp_client(){
 }
 
 void test_rpc_channel(){
-    RPC::IPNetAddr::s_ptr addr = std::make_shared<RPC::IPNetAddr>("127.0.0.1",12345);
-    std::shared_ptr<RPC::RpcChannel> channel = std::make_shared<RPC::RpcChannel>(addr);
 
-    std::shared_ptr<makeOrderRequest> request = std::make_shared<makeOrderRequest>();
+    NEWRPCCHANNEL("127.0.0.1:12345",channel);
+
+    NEWMESSAGE(makeOrderRequest, request);
     request->set_price(10086);
     request->set_goods("banana");
-
-    std::shared_ptr<makeOrderResponse> response = std::make_shared<makeOrderResponse>();
-
-    std::shared_ptr<RPC::RpcController> controller = std::make_shared<RPC::RpcController>();
+    
+    NEWMESSAGE(makeOrderResponse, response);
+    
+    NEWRPCCONTROLLER(controller);
     controller->SetMsgId("99998888");
+    controller->SetTimeout(10000);
 
-    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response,channel]() mutable{
-        INFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
+    // 回调函数
+    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response,channel,controller]() mutable{
+        if(controller->GetErrorCode() == 0){
+            INFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
+        }else{
+            ERRORLOG("call rpc error, request [%s], error code [%d], error info [%s]",
+            request->ShortDebugString().c_str(),
+            controller->GetErrorCode(),
+            controller->GetErrorInfo().c_str());
+        }
 
         channel->getTcpClient()->stop();
         channel.reset();
     });
 
-    channel->Init(controller,request,response,closure);
 
-    Order::Stub stub(channel.get());
-
-    stub.makeOrder(controller.get(), request.get(), response.get(), closure.get());
+    CALLRPC("127.0.0.1:12345", makeOrder, controller, request, response, closure);
 
 }
 

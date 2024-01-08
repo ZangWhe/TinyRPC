@@ -69,7 +69,7 @@ namespace RPC{
 
     }
     void Timer::deleteTimerEvent(TimerEvent::s_ptr event){
-        event->setCancler(true);
+        event->setCancled(true);
 
         ScopeMutex<Mutex> lock(m_mutex);
         auto begin = m_pending_events.lower_bound(event->getArriveTime());

@@ -6,8 +6,26 @@
 
 #include "RPC/net/tcp/net_addr.h"
 #include "RPC/net/tcp/tcp_client.h"
+#include "RPC/net/timer_event.h"
 
 namespace RPC{
+
+    #define NEWMESSAGE(type, var_name)                                                                                              \
+    std::shared_ptr<type> var_name = std::make_shared<type>();                                                                      \
+
+    #define NEWRPCCONTROLLER(var_name)                                                                                              \
+    std::shared_ptr<RPC::RpcController> var_name = std::make_shared<RPC::RpcController>();                                          \
+
+    #define NEWRPCCHANNEL(addr, var_name)                                                                                           \
+    std::shared_ptr<RPC::RpcChannel> var_name = std::make_shared<RPC::RpcChannel>(std::make_shared<RPC::IPNetAddr>(addr));          \
+
+    #define CALLRPC(addr, method_name, controller, request, response, closure)                                                      \
+    {                                                                                                                               \
+    NEWRPCCHANNEL(addr, channel)                                                                                                    \
+    channel->Init(controller,request,response,closure);                                                                             \
+    Order::Stub(channel.get()).makeOrder(controller.get(), request.get(), response.get(), closure.get());                           \
+    }                                                                                                                               \
+
     class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>{
         public:
             typedef std::shared_ptr<RpcChannel> s_ptr;
@@ -36,6 +54,8 @@ namespace RPC{
 
             TcpClient* getTcpClient();
 
+            TimerEvent::s_ptr getTimerEvent();
+
         private:
             NetAddr::s_ptr m_local_addr {nullptr};
             NetAddr::s_ptr m_peer_addr {nullptr};
@@ -48,6 +68,8 @@ namespace RPC{
             bool m_is_init {false};
 
             TcpClient::s_ptr m_client {nullptr};
+
+            TimerEvent::s_ptr m_timer_event {nullptr};
     };
 }
 

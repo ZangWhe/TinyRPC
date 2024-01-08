@@ -6,6 +6,7 @@
 #include "RPC/net/rpc/rpc_controller.h"
 #include "RPC/net/tcp/tcp_client.h"
 #include "RPC/net/coder/tinypb_protocol.h"
+#include "RPC/net/timer_event.h"
 #include "RPC/common/log.h"
 #include "RPC/common/msg_id_util.h"
 #include "RPC/common/error_code.h"
@@ -61,7 +62,17 @@ namespace RPC{
 
             s_ptr channel = shared_from_this();
             
+            m_timer_event = std::make_shared<TimerEvent>(m_controller->GetTimeout(), false, [m_controller, channel]() mutable{
+                m_controller->StartCancel();
+                m_controller->SetError(ERROR_RPC_CALL_TIMEOUT, "rpc call timeout " + std::to_string(m_controller->GetTimeout()));
+                if(channel->getClosure()){
+                    channel->getClosure()->Run();
+                }
+                channel.reset();
+            });
             
+            m_client->addTimerEvent(m_timer_event);
+
             m_client->connect([req_protocol, channel]() mutable{
                 
                 RpcController* m_controller = dynamic_cast<RpcController*>(channel->getController());
@@ -85,12 +96,15 @@ namespace RPC{
                                 rsp_protocol->m_msg_id.c_str(),rsp_protocol->m_method_name.c_str(),
                                 channel->getTcpClient()->getPeerAddr()->toString().c_str(), channel->getTcpClient()->getLocalAddr()->toString().c_str());
                         
+                        // 当成功读取到回包后，取消定时任务
+                        channel->getTimerEvent()->setCancled(true);
 
                         if(!(channel->getResponse()->ParseFromString(rsp_protocol->m_pb_data))){
                             ERRORLOG("%s | serilize error", rsp_protocol->m_msg_id.c_str());
                             m_controller->SetError(ERROR_FAILED_SERIALIZE, "serialize error");
                             return ;
                         }
+
                         if(rsp_protocol->m_err_code != 0){
                             ERRORLOG("%s | call rpc method [%s] faild, error code [%d], error info [%s]",
                                 rsp_protocol->m_msg_id.c_str(), 
@@ -104,8 +118,9 @@ namespace RPC{
                         INFOLOG("%s | call rpc success, call method name [%s], peer addr [%s], local addr [%s]",
                                 rsp_protocol->m_msg_id.c_str(),rsp_protocol->m_method_name.c_str(),
                                 channel->getTcpClient()->getPeerAddr()->toString().c_str(), channel->getTcpClient()->getLocalAddr()->toString().c_str());
+                        
 
-                        if(channel->getClosure()){
+                        if(!m_controller->IsCanceled() && channel->getClosure()){
                             channel->getClosure()->Run();
                         }
                         
@@ -148,4 +163,7 @@ namespace RPC{
         return m_client.get();
     }
 
+    TimerEvent::s_ptr RpcChannel::getTimerEvent(){
+        return m_timer_event;
+    }
 }

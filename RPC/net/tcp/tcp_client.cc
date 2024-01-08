@@ -142,6 +142,9 @@ namespace RPC{
         }
         
         m_local_addr = std::make_shared<IPNetAddr>(local_addr);
+    }
 
+    void TcpClient::addTimerEvent(TimerEvent::s_ptr timer_event){
+        m_event_loop->addTimerEvent(timer_event);
     }
 }

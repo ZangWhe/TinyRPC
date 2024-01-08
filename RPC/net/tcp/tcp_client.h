@@ -7,6 +7,7 @@
 #include "RPC/net/eventloop.h"
 #include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/net/coder/abstract_protocol.h"
+#include "RPC/net/timer_event.h"
 
 namespace RPC{
     class TcpClient{
@@ -41,6 +42,7 @@ namespace RPC{
 
             void initLocalAddr();
 
+            void addTimerEvent(TimerEvent::s_ptr timer_event);
 
         private:
             NetAddr::s_ptr m_peer_addr {nullptr};
