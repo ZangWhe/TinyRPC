@@ -178,6 +178,7 @@ namespace RPC{
     }
     void EventLoop::stop(){
         m_stop_flag = true;
+        wakeup();
 
     }
 

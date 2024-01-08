@@ -5,6 +5,7 @@
 #include <google/protobuf/service.h>
 
 #include "RPC/net/tcp/net_addr.h"
+#include "RPC/net/tcp/tcp_client.h"
 
 namespace RPC{
     class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>{
@@ -33,6 +34,8 @@ namespace RPC{
 
             google::protobuf::Closure* getClosure();
 
+            TcpClient* getTcpClient();
+
         private:
             NetAddr::s_ptr m_local_addr {nullptr};
             NetAddr::s_ptr m_peer_addr {nullptr};
@@ -43,6 +46,8 @@ namespace RPC{
             closure_s_ptr m_closure {nullptr};
 
             bool m_is_init {false};
+
+            TcpClient::s_ptr m_client {nullptr};
     };
 }
 

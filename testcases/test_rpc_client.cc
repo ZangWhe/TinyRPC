@@ -79,8 +79,11 @@ void test_rpc_channel(){
     std::shared_ptr<RPC::RpcController> controller = std::make_shared<RPC::RpcController>();
     controller->SetMsgId("99998888");
 
-    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response](){
+    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response,channel]() mutable{
         INFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
+
+        channel->getTcpClient()->stop();
+        channel.reset();
     });
 
     channel->Init(controller,request,response,closure);

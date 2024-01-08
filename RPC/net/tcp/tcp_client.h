@@ -1,6 +1,8 @@
 #ifndef RPC_NET_TCP_TCP_CLIENT
 #define RPC_NET_TCP_TCP_CLIENT
 
+#include <memory>
+
 #include "RPC/net/tcp/net_addr.h"
 #include "RPC/net/eventloop.h"
 #include "RPC/net/tcp/tcp_connection.h"
@@ -9,6 +11,8 @@
 namespace RPC{
     class TcpClient{
         public:
+            typedef std::shared_ptr<TcpClient> s_ptr;
+
             TcpClient(NetAddr::s_ptr peer_addr);
 
             ~TcpClient();
@@ -23,7 +27,9 @@ namespace RPC{
 
             // 异步读取msg
             // 如果读取成功，会调用回调函数done，函数的入参就是msg对象
-            void readMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);            
+            void readMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);
+
+            void stop();         
         private:
             NetAddr::s_ptr m_peer_addr;
             EventLoop* m_event_loop {nullptr};
