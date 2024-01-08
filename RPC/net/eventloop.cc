@@ -139,11 +139,11 @@ namespace RPC{
             int timeout = g_epoll_max_timeout;
             epoll_event result_events[g_epoll_max_events];
 
-            // DEBUGLOG("now begin to epoll_wait");
+            DEBUGLOG("now begin to epoll_wait");
 
             int rt = epoll_wait(m_epoll_fd, result_events, g_epoll_max_events, timeout);
 
-            // DEBUGLOG("now end to epoll_wait,rt = [%d]",rt);
+            DEBUGLOG("now end to epoll_wait,rt = [%d]",rt);
 
             if(rt < 0){
                 ERRORLOG("epoll_wait error,error =[%d]",errno);
@@ -164,6 +164,13 @@ namespace RPC{
                     if(trigger_event.events & EPOLLOUT){
                         DEBUGLOG("fd %d trigger EPOLLOUT event",fd_event->getFd());
                         addTask(fd_event->handler(FdEvent::OUT_EVENT));
+                    }
+                    if(trigger_event.events & EPOLLERR){
+                        DEBUGLOG("fd %d trigger EPOLLERR event",fd_event->getFd());
+                        deleteEpollEvent(fd_event);
+                        if(fd_event->handler(FdEvent::ERROR_EVENT) != nullptr){
+                            addTask(fd_event->handler(FdEvent::ERROR_EVENT));
+                        }
                     }
                 }
             }

@@ -12,8 +12,8 @@ namespace RPC{
 
             enum TriggerEvent{
                 IN_EVENT = EPOLLIN,
-                OUT_EVENT = EPOLLOUT
-                
+                OUT_EVENT = EPOLLOUT,
+                ERROR_EVENT = EPOLLERR
             };
 
             FdEvent(int fd);
@@ -26,7 +26,7 @@ namespace RPC{
             
             std::function<void()> handler(TriggerEvent event_type);
 
-            void listen(TriggerEvent event_type,std::function<void()> callback);
+            void listen(TriggerEvent event_type,std::function<void()> callback, std::function<void()> error_callback = nullptr);
 
             void cancle(TriggerEvent event_type);   // 取消监听
 
@@ -37,13 +37,16 @@ namespace RPC{
             epoll_event getEpollEvent(){
                 return m_listen_events; 
             }
+
+            // void setErrorCallback(std::function<void()> cb);
         protected:
             int m_fd{-1};
 
             epoll_event m_listen_events;
 
-            std::function<void()> m_read_callback;
-            std::function<void()> m_write_callback;
+            std::function<void()> m_read_callback {nullptr};
+            std::function<void()> m_write_callback {nullptr};
+            std::function<void()> m_error_callback {nullptr};
     };
 }
 

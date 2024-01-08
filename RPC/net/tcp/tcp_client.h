@@ -29,13 +29,35 @@ namespace RPC{
             // 如果读取成功，会调用回调函数done，函数的入参就是msg对象
             void readMessage(const std::string& req_id, std::function<void(AbstractProtocol::s_ptr)> done);
 
-            void stop();         
+            void stop();
+
+            int getConnectErrorCode();
+
+            std::string getConnectErrorInfo();
+
+            NetAddr::s_ptr getPeerAddr();
+
+            NetAddr::s_ptr getLocalAddr();
+
+            void initLocalAddr();
+
+
         private:
-            NetAddr::s_ptr m_peer_addr;
+            NetAddr::s_ptr m_peer_addr {nullptr};
+
+            NetAddr::s_ptr m_local_addr {nullptr};
+
             EventLoop* m_event_loop {nullptr};
+
             int m_fd {-1};
+
             FdEvent* m_fd_event {nullptr};
-            TcpConnection::s_ptr m_connection;
+
+            TcpConnection::s_ptr m_connection {nullptr};
+
+            int m_connect_error_code {0};
+
+            std::string m_connect_error_info;
     };
 }
 #endif

@@ -63,13 +63,28 @@ namespace RPC{
             
             
             m_client->connect([req_protocol, channel]() mutable{
-                channel->getTcpClient()->writeMessage(req_protocol, [req_protocol, channel](AbstractProtocol::s_ptr) mutable{
-                    INFOLOG("%s | rpc send request success. method_name [%s]", req_protocol->m_msg_id.c_str(), req_protocol->m_method_name.c_str());
-                    channel->getTcpClient()->readMessage(req_protocol->m_msg_id, [channel](AbstractProtocol::s_ptr msg) mutable{
-                        std::shared_ptr<RPC::TinyPBProtocol> rsp_protocol = std::dynamic_pointer_cast<RPC::TinyPBProtocol>(msg);
-                        INFOLOG("%s | get response success, call method name [%s]", rsp_protocol->m_msg_id.c_str(),rsp_protocol->m_method_name.c_str());
+                
+                RpcController* m_controller = dynamic_cast<RpcController*>(channel->getController());
 
-                        RpcController* m_controller = dynamic_cast<RpcController*>(channel->getController());
+                if(channel->getTcpClient()->getConnectErrorCode() != 0){
+                    m_controller->SetError(channel->getTcpClient()->getConnectErrorCode(), channel->getTcpClient()->getConnectErrorInfo());
+                    ERRORLOG("%s | connect error, error code [%d] , error_info [%s], peer_addr [%s]", 
+                                req_protocol->m_msg_id.c_str(), m_controller->GetErrorCode(), m_controller->GetErrorInfo().c_str(),
+                                    channel->getTcpClient()->getPeerAddr()->toString().c_str());
+                    return ;
+                }
+
+                channel->getTcpClient()->writeMessage(req_protocol, [req_protocol, channel, m_controller](AbstractProtocol::s_ptr) mutable{
+                    INFOLOG("%s | send rpc request success. method_name [%s], peer addr [%s], local addr [%s]", 
+                                req_protocol->m_msg_id.c_str(), req_protocol->m_method_name.c_str(),
+                                channel->getTcpClient()->getPeerAddr()->toString().c_str(), channel->getTcpClient()->getLocalAddr()->toString().c_str());
+
+                    channel->getTcpClient()->readMessage(req_protocol->m_msg_id, [channel,m_controller](AbstractProtocol::s_ptr msg) mutable{
+                        std::shared_ptr<RPC::TinyPBProtocol> rsp_protocol = std::dynamic_pointer_cast<RPC::TinyPBProtocol>(msg);
+                        INFOLOG("%s | get response success, call method name [%s], peer addr [%s], local addr [%s]",
+                                rsp_protocol->m_msg_id.c_str(),rsp_protocol->m_method_name.c_str(),
+                                channel->getTcpClient()->getPeerAddr()->toString().c_str(), channel->getTcpClient()->getLocalAddr()->toString().c_str());
+                        
 
                         if(!(channel->getResponse()->ParseFromString(rsp_protocol->m_pb_data))){
                             ERRORLOG("%s | serilize error", rsp_protocol->m_msg_id.c_str());
@@ -85,6 +100,11 @@ namespace RPC{
                             m_controller->SetError(rsp_protocol->m_err_code, rsp_protocol->m_err_info);
                             return ;
                         }
+
+                        INFOLOG("%s | call rpc success, call method name [%s], peer addr [%s], local addr [%s]",
+                                rsp_protocol->m_msg_id.c_str(),rsp_protocol->m_method_name.c_str(),
+                                channel->getTcpClient()->getPeerAddr()->toString().c_str(), channel->getTcpClient()->getLocalAddr()->toString().c_str());
+
                         if(channel->getClosure()){
                             channel->getClosure()->Run();
                         }
