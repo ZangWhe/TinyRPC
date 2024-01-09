@@ -79,19 +79,18 @@ void test_rpc_channel(){
     NEWRPCCONTROLLER(controller);
     controller->SetMsgId("99998888");
     controller->SetTimeout(10000);
-
+    
     // 回调函数
     std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response,channel,controller]() mutable{
         if(controller->GetErrorCode() == 0){
-            INFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
+            APPINFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
         }else{
             ERRORLOG("call rpc error, request [%s], error code [%d], error info [%s]",
             request->ShortDebugString().c_str(),
             controller->GetErrorCode(),
             controller->GetErrorInfo().c_str());
         }
-
-        channel->getTcpClient()->stop();
+        // channel->getTcpClient()->stop();
         channel.reset();
     });
 
@@ -101,7 +100,7 @@ void test_rpc_channel(){
 }
 
 int main(){
-	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
+	RPC::Config::SetGlobalConfig("../conf/TinyxmlClient.xml");
 	RPC::Logger::InitGlobalLogger();
 
     // test_tcp_client();

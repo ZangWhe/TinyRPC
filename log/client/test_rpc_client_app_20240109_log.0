@@ -1,0 +1,1 @@
+[INFO]	[24-01-09 22:55:00.162]	[1821902:1821902]	[testcases/test_rpc_client.cc : 86]	call rpc success, request [price: 10086 goods: "banana"], response [order_id: "20240106"]

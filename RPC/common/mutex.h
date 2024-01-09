@@ -29,6 +29,7 @@ public:
 		}
 	}
 
+
 private:
 	T& m_mutex;
 	bool m_is_lock {false};
@@ -49,6 +50,10 @@ public:
 	}
 	void unlock(){
 		pthread_mutex_unlock(&m_mutex);
+	}
+
+	pthread_mutex_t* getMutex(){
+		return &m_mutex;
 	}
 
 private:

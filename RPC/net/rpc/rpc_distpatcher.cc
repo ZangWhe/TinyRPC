@@ -9,6 +9,7 @@
 #include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/common/log.h"
 #include "RPC/common/error_code.h"
+#include "RPC/common/run_time.h"
 
 
 namespace RPC{
@@ -71,6 +72,10 @@ namespace RPC{
         rpcController.SetLocalAddr(connection->getLocalAddr());
         rpcController.SetPeerAddr(connection->getPeerAddr());
         rpcController.SetMsgId(req_protocol->m_msg_id);
+
+        // 设置 app log 配置
+        RunTime::GetRunTime()->m_msg_id = req_protocol->m_msg_id;
+        RunTime::GetRunTime()->m_method_name = method_name;
 
         service->CallMethod(method, &rpcController, req_msg,  rsp_msg, NULL);
 

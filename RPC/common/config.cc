@@ -43,8 +43,16 @@ namespace RPC{
 		READ_XML_NODE(log,root_node);
 
 		READ_STRING_FROM_XML_NODE(log_level,log_node);
+		READ_STRING_FROM_XML_NODE(log_file_name,log_node);
+		READ_STRING_FROM_XML_NODE(log_file_path,log_node);
+		READ_STRING_FROM_XML_NODE(log_file_max_size,log_node);
+		READ_STRING_FROM_XML_NODE(log_sync_interval,log_node);
 		
 		m_log_level = log_level_str;
+		m_log_file_name = log_file_name_str;
+		m_log_file_path = log_file_path_str;
+		m_log_file_max_size = std::atoi(log_file_max_size_str.c_str());
+		m_log_sync_interval = std::atoi(log_sync_interval_str.c_str());
 
 	}
 
