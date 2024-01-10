@@ -13,7 +13,10 @@
 
 namespace RPC{
     
-    Logger::Logger(LogLevel level) : m_set_level(level){
+    Logger::Logger(LogLevel level, int type) : m_set_level(level), m_type(type){
+        if(m_type == 0){
+            return ;
+        }
         m_async_logger = std::make_shared<AsyncLogger>(
                 Config::GetGlobalConfig()->m_log_file_name + "_rpc",
                 Config::GetGlobalConfig()->m_log_file_path,
@@ -26,6 +29,10 @@ namespace RPC{
     }
 
     void Logger::init(){
+        if(m_type == 0){
+            return ;
+        }
+
         m_timer_event = std::make_shared<TimerEvent>(Config::GetGlobalConfig()->m_log_sync_interval, true, std::bind(&Logger::syncLoop, this));
 
         EventLoop::GetCurrentEventLoop()->addTimerEvent(m_timer_event);
@@ -133,18 +140,23 @@ namespace RPC{
     Logger* Logger::GetGlobalLogger(){
         return g_logger;
     }
-    void Logger::InitGlobalLogger(){
+    void Logger::InitGlobalLogger(int type){
     	LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);	     
         printf("Init Log Level [%s]\n",LogLevelToString(global_log_level).c_str());
-	    g_logger = new Logger(global_log_level);
+	    g_logger = new Logger(global_log_level, type);
         g_logger->init();
 	
     }
 
     void Logger::pushLog(const std::string& msg){
-        ScopeMutex<Mutex> lock(m_mutex);
-        m_buffer.emplace_back(msg);
-        lock.unlock();
+        if(m_type == 0){
+            printf("%s\n",msg.c_str());
+        }else{
+            ScopeMutex<Mutex> lock(m_mutex);
+            m_buffer.emplace_back(msg);
+            lock.unlock();
+        }
+        
     }
     void Logger::pushAppLog(const std::string& msg){
         ScopeMutex<Mutex> lock(m_app_mutex);

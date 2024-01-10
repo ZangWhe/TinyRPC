@@ -100,8 +100,8 @@ void test_rpc_channel(){
 }
 
 int main(){
-	RPC::Config::SetGlobalConfig("../conf/TinyxmlClient.xml");
-	RPC::Logger::InitGlobalLogger();
+	RPC::Config::SetGlobalConfig(NULL);
+	RPC::Logger::InitGlobalLogger(0);
 
     // test_tcp_client();
     test_rpc_channel();

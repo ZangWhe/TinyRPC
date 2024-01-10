@@ -9,6 +9,7 @@ class Config{
 
 public:
 	Config(const char* xmlfile);
+	Config();
 public:
 	static Config* GetGlobalConfig();
 	static void SetGlobalConfig(const char* xmlfile);
@@ -20,6 +21,9 @@ public:
 	int m_log_file_max_size {0};
 
 	int m_log_sync_interval {0};		// 日志同步间隔, ms
+
+	int m_port {0};
+	int m_io_threads {0};
 
 };
 

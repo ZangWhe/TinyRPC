@@ -161,7 +161,7 @@ namespace RPC{
         public:
             typedef std::shared_ptr<Logger> s_ptr;
 
-            Logger(LogLevel level);
+            Logger(LogLevel level, int type = 1);
 
             void init();
 
@@ -181,7 +181,7 @@ namespace RPC{
         public:
             static Logger* GetGlobalLogger();
 	        
-            static void InitGlobalLogger();
+            static void InitGlobalLogger(int type = 1);
 
         private:
             std::vector<std::string> m_buffer;
@@ -205,6 +205,8 @@ namespace RPC{
             AsyncLogger::s_ptr m_async_app_logger;
 
             TimerEvent::s_ptr m_timer_event;
+
+            int m_type {0};
     };
 
 
