@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
         printf("./test_rpc_server ../conf/Tinyxml.xml\n");
         return 0;
     }
-	RPC::Config::SetGlobalConfig("../conf/Tinyxml.xml");
+	RPC::Config::SetGlobalConfig(argv[1]);
 	RPC::Logger::InitGlobalLogger();
 
     

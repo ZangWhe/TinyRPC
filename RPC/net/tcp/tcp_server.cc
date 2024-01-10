@@ -5,6 +5,7 @@
 #include "RPC/net/io_thread_group.h"
 #include "RPC/net/tcp/tcp_connection.h"
 #include "RPC/common/log.h"
+#include "RPC/common/config.h"
 
 namespace RPC{
     TcpServer::TcpServer(NetAddr::s_ptr local_addr) : m_local_addr(local_addr){
@@ -28,8 +29,7 @@ namespace RPC{
 
         m_main_event_loop = EventLoop::GetCurrentEventLoop();
 
-        m_io_thread_group = new IOThreadGroup(2);
-        INFOLOG("the subReactor size is 2");
+        m_io_thread_group = new IOThreadGroup(Config::GetGlobalConfig()->m_io_threads);
 
         m_listen_fd_event = new FdEvent(m_acceptor->getListenfd());
 
@@ -50,6 +50,7 @@ namespace RPC{
         TcpConnection::s_ptr connection = std::make_shared<TcpConnection>(io_thread->getEventLoop(), client_fd, 128, peer_addr, m_local_addr);
         connection->setState(Connected);
         m_client.insert(connection);
+        // 需要删除掉关闭的连接
         INFOLOG("TcpServer success get client, fd = %d",client_fd);
     }
     

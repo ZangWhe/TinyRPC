@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option cc_generic_services = true;
+
+message addSyudentRequest{
+    int32 price = 1;
+    string goods = 2;
+}
+
+message addSyudentResponse{
+    int32 ret_code = 1;     // 业务错误返回码， 0代表成果
+    string res_info = 2;    // 业务错误信息
+    string order_id = 3;    
+}
+
+message queryStudentRequest{
+    string order_id = 1;
+}
+
+message queryStudentResponse{
+    int32 ret_code = 1;
+    string res_info = 2;
+    string order_id = 3;
+    int32 price = 4;
+    string goods = 5;
+}
+
+
+service Order{
+    rpc add_student (addSyudentRequest) returns (addSyudentResponse);
+
+    rpc query_student (queryStudentRequest) returns (queryStudentResponse);
+}

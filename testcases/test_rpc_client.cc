@@ -95,7 +95,7 @@ void test_rpc_channel(){
     });
 
 
-    CALLRPC("127.0.0.1:12345", makeOrder, controller, request, response, closure);
+    CALLRPC("127.0.0.1:12345", Order_Stub, makeOrder, controller, request, response, closure);
 
 }
 
