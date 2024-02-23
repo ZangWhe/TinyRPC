@@ -14,9 +14,9 @@ namespace RPC{
         rt = sem_init(&m_start_semaphore,0,0);
         assert(rt == 0);
 
-        pthread_create(&m_thread,NULL,&IOThread::Main,this);
+        pthread_create(&m_thread, NULL, &IOThread::Main, this);
 
-        // 等待当前线程执行完Main函数的loop循环之前
+        // 等待当前线程，直到Main函数中的loop循环之前都执行完
         rt = sem_wait(&m_init_semaphore);
         
         DEBUGLOG("IOThread [%d] create success",m_thread_id);
@@ -50,7 +50,7 @@ namespace RPC{
 
     void* IOThread::Main(void* arg){
         IOThread* thread = static_cast<IOThread*> (arg);
-
+        // 创建epoll
         thread->m_event_loop = new EventLoop();
         thread->m_thread_id = getThreadId();
 

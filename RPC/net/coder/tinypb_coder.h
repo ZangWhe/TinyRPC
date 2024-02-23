@@ -17,9 +17,7 @@ namespace RPC{
         private:
             std::pair<const char*,int> encodeTinyPB(std::shared_ptr<TinyPBProtocol> message);
             // const char* encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, int& len);
-
     };
 }
-
 
 #endif

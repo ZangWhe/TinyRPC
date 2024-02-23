@@ -17,15 +17,12 @@ namespace RPC{
 
         m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(fd);
         m_fd_event->setNonBlock();
-        
 
         m_coder = new TinyPBCoder();
 
         if(m_connection_type == TcpConnectionByServer){
             listenRead();
-            // m_dispatcher = std::make_shared<RpcDispatcher>();
         }
-
     }
 
     TcpConnection::~TcpConnection(){
@@ -84,7 +81,6 @@ namespace RPC{
     }
 
     void TcpConnection::excute(){
-
         if(m_connection_type == TcpConnectionByServer){
             // 将RPC请求执行业务逻辑，获取RPC响应，再把RPC响应发送回去
 
@@ -92,7 +88,7 @@ namespace RPC{
             std::vector<AbstractProtocol::s_ptr> replay_messages;
             m_coder->decode(result, m_in_buffer);
             for(size_t i = 0; i < result.size(); i++){
-                // 1. 针对每一个请求，调用RPC发方法，获取响应message
+                // 1. 针对每一个请求，调用RPC方法，获取响应message
                 // 2. 将响应message 放入到发送缓冲区中，监听可写时间回包
                 INFOLOG("success get request [%s] from client [%s]",result[i]->m_msg_id.c_str(), m_peer_addr->toString().c_str());
                 std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
@@ -115,10 +111,7 @@ namespace RPC{
                     it->second(result[i]);
                 }
             }
-        }
-
-        
-        
+        } 
     }
 
     void TcpConnection::onWrite(){

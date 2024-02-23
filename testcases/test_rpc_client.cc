@@ -1,4 +1,3 @@
-
 #include<stdio.h>
 #include<assert.h>
 #include<sys/socket.h>
@@ -81,7 +80,7 @@ void test_rpc_channel(){
     controller->SetTimeout(10000);
     
     // 回调函数
-    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>([request,response,channel,controller]() mutable{
+    std::shared_ptr<RPC::RpcClosure> closure = std::make_shared<RPC::RpcClosure>(nullptr, [request,response,channel,controller]() mutable{
         if(controller->GetErrorCode() == 0){
             APPINFOLOG("call rpc success, request [%s], response [%s]", request->ShortDebugString().c_str(), response->ShortDebugString().c_str());
         }else{
@@ -103,8 +102,8 @@ int main(){
 	RPC::Config::SetGlobalConfig(NULL);
 	RPC::Logger::InitGlobalLogger(0);
 
-    // test_tcp_client();
-    test_rpc_channel();
+    test_tcp_client();
+    //test_rpc_channel();
 
 	return 0;
 }

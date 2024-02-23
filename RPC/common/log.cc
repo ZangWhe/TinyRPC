@@ -4,6 +4,8 @@
 #include<string>
 #include<sstream>
 #include<stdio.h>
+#include<signal.h>
+#include<assert.h>
 
 #include "RPC/common/log.h"
 #include "RPC/common/util.h"
@@ -17,6 +19,7 @@ namespace RPC{
         if(m_type == 0){
             return ;
         }
+       
         m_async_logger = std::make_shared<AsyncLogger>(
                 Config::GetGlobalConfig()->m_log_file_name + "_rpc",
                 Config::GetGlobalConfig()->m_log_file_path,
@@ -26,13 +29,14 @@ namespace RPC{
                 Config::GetGlobalConfig()->m_log_file_name + "_app",
                 Config::GetGlobalConfig()->m_log_file_path,
                 Config::GetGlobalConfig()->m_log_file_max_size);
+       
     }
 
     void Logger::init(){
         if(m_type == 0){
             return ;
         }
-
+        
         m_timer_event = std::make_shared<TimerEvent>(Config::GetGlobalConfig()->m_log_sync_interval, true, std::bind(&Logger::syncLoop, this));
 
         EventLoop::GetCurrentEventLoop()->addTimerEvent(m_timer_event);
@@ -41,7 +45,6 @@ namespace RPC{
     void Logger::syncLoop(){
         // 同步 m_buffer 到 aysnc_buffer 的队列尾部
         ScopeMutex<Mutex> lock(m_mutex);
-        
         std::vector<std::string> tmp;
         m_buffer.swap(tmp);
         lock.unlock();
@@ -52,7 +55,6 @@ namespace RPC{
 
         // 同步 m_app_buffer 到 aysnc_app_buffer 的队列尾部
         ScopeMutex<Mutex> app_lock(m_app_mutex);
-        
         std::vector<std::string> tmp_app;
         m_app_buffer.swap(tmp_app);
         app_lock.unlock();
@@ -140,12 +142,11 @@ namespace RPC{
     Logger* Logger::GetGlobalLogger(){
         return g_logger;
     }
-    void Logger::InitGlobalLogger(int type){
+    void Logger::InitGlobalLogger(int type /*=1*/){
     	LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);	     
-        printf("Init Log Level [%s]\n",LogLevelToString(global_log_level).c_str());
+        printf("Init Log Levels [%s]\n",LogLevelToString(global_log_level).c_str());
 	    g_logger = new Logger(global_log_level, type);
         g_logger->init();
-	
     }
 
     void Logger::pushLog(const std::string& msg){
@@ -180,11 +181,8 @@ namespace RPC{
     AsyncLogger::AsyncLogger(const std::string& file_name, const std::string& file_path, int max_file_size)
     : m_file_name(file_name), m_file_path(file_path), m_max_file_size(max_file_size){
         sem_init(&m_sempahore, 0, 0);
-
-        pthread_create(&m_thread, NULL, &AsyncLogger::Loop, this);
-
-        // pthread_cond_init(&m_condition, NULL);
-
+        assert(pthread_create(&m_thread, NULL, &AsyncLogger::Loop, this) == 0);
+        //pthread_create(&m_thread, NULL, &AsyncLogger::Loop, this);
         sem_wait(&m_sempahore);
     }
 
@@ -193,9 +191,8 @@ namespace RPC{
         // 然后线程睡眠，直到有新的数据
         // 重复上述过程
         AsyncLogger* logger = reinterpret_cast<AsyncLogger*>(arg);
-        
-        pthread_cond_init(&logger->m_condition, NULL);
-
+        assert(pthread_cond_init(&logger->m_condition, NULL) == 0);
+        //pthread_cond_init(&logger->m_condition, NULL);
         sem_post(&logger->m_sempahore);
 
         while(true){
@@ -234,7 +231,6 @@ namespace RPC{
                << std::string(date) << "_log." ;
 
             std::string log_file_name = ss.str() + std::to_string(logger->m_log_no);
-
             if(logger->m_reopen_flag){
                 if(logger->m_file_handler){
                     fclose(logger->m_file_handler);
@@ -242,7 +238,7 @@ namespace RPC{
                 logger->m_file_handler = fopen(log_file_name.c_str(), "a");
                 logger->m_reopen_flag = false;
             }
-
+            
             if(ftell(logger->m_file_handler) > logger->m_max_file_size){
                 fclose(logger->m_file_handler);
                 log_file_name = ss.str() + std::to_string(++logger->m_log_no);
@@ -279,7 +275,6 @@ namespace RPC{
         ScopeMutex<Mutex> lock(m_mutex);
         m_buffer.push(vec);
         lock.unlock();
-
         // 此时需唤醒异步日志线程
         pthread_cond_signal(&m_condition);
     }

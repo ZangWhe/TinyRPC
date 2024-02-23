@@ -33,7 +33,6 @@ namespace RPC{
             }
         }
 
-
     }
 
     void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr>& out_messages, TcpBuffer::s_ptr buffer){
@@ -48,7 +47,7 @@ namespace RPC{
             int i = 0;
             for(i=start_index; i<buffer->writeIndex(); i++){
                 if(tmp_buffer[i] == TinyPBProtocol::PB_START){
-                    // 读取接下来的四个字节，，由于是网络字节序，需要转换为主机字节序
+                    // 读取接下来的四个字节，由于是网络字节序，需要转换为主机字节序
                     if(i+1 < buffer->writeIndex()){
                         pack_len = getInt32FromNetByte(&tmp_buffer[i+1]);
                         DEBUGLOG("get pack len = %d",ATOMIC_CHAR32_T_LOCK_FREE);

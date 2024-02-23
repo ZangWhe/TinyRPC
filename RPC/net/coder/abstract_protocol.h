@@ -22,7 +22,6 @@ namespace RPC{
         // protected:
         public:
             std::string m_msg_id;   // 请求号，唯一标识一个请求或者响应
-
     };
 }
 

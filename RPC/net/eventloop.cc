@@ -42,12 +42,14 @@ namespace RPC{
     m_listen_fds.erase(event->getFd());                                                                                     \
     DEBUGLOG("success to delete event,fd [%d]",event->getFd());                                                             \
 
+
     // 当前循环
     static thread_local EventLoop* t_current_eventloop = NULL;
     // 最大超时时间
     static int g_epoll_max_timeout = 10000;
     // 最大监听事件数
     static int g_epoll_max_events = 10;
+
     EventLoop::EventLoop(){
         if(t_current_eventloop != NULL){
             ERRORLOG("faild to create event loop,this thread has created eventloop");
@@ -56,6 +58,7 @@ namespace RPC{
         m_thread_id = getThreadId();
         
         m_epoll_fd = epoll_create(10);
+
         if(m_epoll_fd == -1){
             ERRORLOG("faild to create event loop,epoll_create error,error info [%d]",errno);
             exit(0);
@@ -63,14 +66,7 @@ namespace RPC{
         INFOLOG("Start InitWakeFdEvent");
         initWakeupFdEvent();
         initTimer();
-        // epoll_event event;
-        // event.events = EPOLLIN;
-        // int rt = epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_wakeup_fd, &event);
-        // if(rt == -1){
-        //     ERRORLOG("faild to create event loop,epoll_ctl eventfd error,error info [%d]",errno);
-        //     exit(0);
-        // }
-
+        
         INFOLOG("success to create event loop in thread %d",m_thread_id);
         t_current_eventloop = this;
     }
@@ -113,7 +109,6 @@ namespace RPC{
 
     void EventLoop::addTimerEvent(TimerEvent::s_ptr event){
         m_timer->addTimerEvent(event);
-
     }
 
     void EventLoop::loop(){
@@ -134,7 +129,6 @@ namespace RPC{
                     cb();
                 }
             }
-
             
             int timeout = g_epoll_max_timeout;
             epoll_event result_events[g_epoll_max_events];
@@ -176,7 +170,7 @@ namespace RPC{
             }
         }
     }
-
+    // 唤醒epoll
     void EventLoop::wakeup(){
         m_wakeup_fd_event->wakeup();
     }
@@ -191,9 +185,12 @@ namespace RPC{
 
     void EventLoop::addEpollEvent(FdEvent* event){
         if(isInLoopThread()){
+            // 如果是当前线程添加Epoll，直接添加
             ADD_TO_EPOLL();
         }else{
-            auto cb =[this,event](){
+            // 如果是跨线程添加，比如MainReactor向SubReactor添加Epoll事件
+            // 则在任务队列执行时的回调函数中添加
+            auto cb = [this,event](){
                 ADD_TO_EPOLL();
             };
             addTask(cb,true);

@@ -23,7 +23,7 @@ namespace RPC{
     {                                                                                                                               \
     NEWRPCCHANNEL(addr, channel)                                                                                                    \
     channel->Init(controller,request,response,closure);                                                                             \
-    stub_name(channel.get()).makeOrder(controller.get(), request.get(), response.get(), closure.get());                           \
+    stub_name(channel.get()).method_name(controller.get(), request.get(), response.get(), closure.get());                           \
     }                                                                                                                               \
 
     class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>{

@@ -60,7 +60,7 @@ namespace RPC{
                 is_reset_timerfd = true;
             }
         }
-        m_pending_events.emplace(event->getArriveTime(),event);
+        m_pending_events.emplace(event->getArriveTime(), event);
         lock.unlock();
 
         if(is_reset_timerfd){
@@ -87,8 +87,9 @@ namespace RPC{
         lock.unlock();
         DEBUGLOG("success delete TimerEvent at arrive time %lld",event->getArriveTime());
     }
+
     void Timer::onTimer(){
-         // 处理缓冲区数据吗，防止下一次继续触发可读事件
+         // 处理缓冲区数据，防止下一次继续触发可读事件
         char buffer[8];
         while(true){
             if((read(m_fd,buffer,8) == -1) && errno == EAGAIN){
@@ -112,10 +113,11 @@ namespace RPC{
                 break;
             }
         }
+        // 删除执行完的定时器事件
         m_pending_events.erase(m_pending_events.begin(),it);
         lock.unlock();
 
-        // 需要把重复的Event再次添加进去
+        // 把需要重复的Event再次添加进去
         for(auto i = tmps.begin(); i != tmps.end(); ++i){
             if((*i)->isRepeated()){
                 // 调整arrive_time
@@ -130,5 +132,4 @@ namespace RPC{
             }
         }
     }
-    
 }

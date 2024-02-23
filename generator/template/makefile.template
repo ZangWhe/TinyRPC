@@ -21,8 +21,8 @@ PATH_TEST_CLIENT_TOOL = $(PATH_TEST_CLIENT)/test_tool
 
 # librpc
 # if you have installed librpc.a in another path, please modify it
-RPC_LIB = /usr/lib/librpc.a
-RPC_PATH = /usr/include/rpc
+RPC_LIB = /usr/lib/libTinyRPC.a
+RPC_PATH = /usr/include/RPC
 
 # protobuf
 # if you have installed libprotobuf.a in another path, please modify it

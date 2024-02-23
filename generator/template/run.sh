@@ -4,40 +4,33 @@ PROJECT_NAME=$(basename ${FILE_NAME})
 CURRENT_PATH=$(cd $(dirname $0); pwd)
 PROJECT_ROOT_PATH=$(cd $(dirname $0); cd ..; pwd)
 PROJECT_BIN_FILE="${CURRENT_PATH}"/"${PROJECT_NAME}"
-PROJECT_CONF_FILE="../conf/rpc.xml"
-
-
-echo "Run rpc rpc project, name: ${PROJECT_NAME}, path: ${PROJECT_BIN_FILE}"
-
+PROJECT_CONF_FILE="../conf/Tinyrpc.xml"
+echo "Run rpc project, name: ${PROJECT_NAME}, path: ${PROJECT_BIN_FILE}"
 if [ -z "$1" ]
 then
   echo "Please input execuable binary file!"
 fi
-
 # check bin file exist
 if [ ! -e ${PROJECT_BIN_FILE} ]
 then
-  echo "Run rpc rpc server eror, file: ${PROJECT_BIN_FILE} not exist, please check file"
+  echo "Run rpc server eror, file: ${PROJECT_BIN_FILE} not exist, please check file"
   exit -1
 fi
-
 # check config xml file exist
 if [ ! -e ${PROJECT_CONF_FILE} ]
 then
-  echo "Run rpc rpc error, file: ${PROJECT_CONF_FILE} not exist, please check config file"
+  echo "Run rpc error, file: ${PROJECT_CONF_FILE} not exist, please check config file"
   exit -1
 fi
-
 # check bin file execute privilege
 if [ ! -x ${PROJECT_BIN_FILE} ]
 then
   echo "chmod +x : ${PROJECT_BIN_FILE}"
   chmod +x ${PROJECT_BIN_FILE}
 fi
-
 sh shutdown.sh ${PROJECT_NAME}
 nohup ./${PROJECT_NAME} ${PROJECT_CONF_FILE} & > ${PROJECT_ROOT_PATH}/log/${PROJECT_NAME}.nohup_log
-echo "Start rpc rpc server ${PROJECT_CONF_FILE} succ"
+echo "Start rpc server ${PROJECT_CONF_FILE} succ"
 
 
 

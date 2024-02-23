@@ -50,7 +50,7 @@ namespace RPC{
         TcpConnection::s_ptr connection = std::make_shared<TcpConnection>(io_thread->getEventLoop(), client_fd, 128, peer_addr, m_local_addr);
         connection->setState(Connected);
         m_client.insert(connection);
-        // 需要删除掉关闭的连接
+        
         INFOLOG("TcpServer success get client, fd = %d",client_fd);
     }
     

@@ -2,6 +2,7 @@
 #define RPC_COMMON_RUN_TIME_H
 
 #include <string>
+#include "RPC/net/rpc/rpc_interface.h"
 
 namespace RPC{
     class RunTime{
@@ -16,6 +17,8 @@ namespace RPC{
             std::string m_msg_id;
 
             std::string m_method_name;
+
+            RpcInterface* m_rpc_interface {NULL};
     };
 }
 

@@ -1,8 +1,5 @@
 /****************************************************
  *
- * ****     ***     ****    *   *    *****    *****
- * *  *    *   *   *        ****     ***        *
- * *   *    ***     ****    *   *    *****      *
  *
  * ${FILE_NAME}
  * ${CREATE_TIME}
@@ -12,10 +9,10 @@
 ****************************************************/
 
 
-#include <rpc/common/log.h>
-#include <rpc/net/rpc/rpc_closure.h>
-#include <rpc/net/rpc/rpc_closure.h>
-#include <rpc/net/rpc/rpc_controller.h>
+#include <RPC/common/log.h>
+#include <RPC/net/rpc/rpc_closure.h>
+#include <RPC/net/rpc/rpc_closure.h>
+#include <RPC/net/rpc/rpc_controller.h>
 #include <google/protobuf/message.h>
 
 ${INCLUDE_INTERFACEBASE_HEADER_FILE}
@@ -23,8 +20,8 @@ ${INCLUDE_INTERFACEBASE_HEADER_FILE}
 namespace ${PROJECT_NAME} {
 
 
-Interface::Interface(const google::protobuf::Message* req, google::protobuf::Message* rsp, rpc::RpcClosure* done, rpc::RpcController* controller)
-  : rpc::RpcInterface(req, rsp, done, controller) {
+Interface::Interface(const google::protobuf::Message* req, google::protobuf::Message* rsp, RPC::RpcClosure* done, RPC::RpcController* controller)
+  : RPC::RpcInterface(req, rsp, done, controller) {
 
 }
 

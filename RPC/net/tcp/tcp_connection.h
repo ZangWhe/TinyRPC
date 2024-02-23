@@ -25,6 +25,7 @@ namespace RPC{
         TcpConnectionByServer = 1,  // 作为服务端使用，代表与对端客户端的连接
         TcpConnectionByClient = 2,  // 作为客户端使用，代表与对端服务端的连接
     };
+    
     class TcpConnection{
         public:
             typedef std::shared_ptr<TcpConnection> s_ptr;

@@ -1,4 +1,4 @@
-#!/usr/bin/python3.7
+#!/usr/bin/python3.10
 
 import getopt
 import traceback
@@ -208,7 +208,7 @@ def gen_run_script():
     
 def gen_conf_file():
     print('=' * 100)
-    file_name = "rpc.xml"
+    file_name = "Tinyrpc.xml"
     print('Begin to generate tinyrpc conf file')
     out_file = conf_path + '/' + file_name
     if os.path.exists(out_file):

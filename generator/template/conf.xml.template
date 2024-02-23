@@ -15,7 +15,7 @@
     <log_file_path>../log/</log_file_path>
 
     <!-- 单个日志文件最大大小，单位为字节 -->
-    <log_max_file_size>1000000000</log_max_file_size>
+    <log_file_max_size>1000000000</log_file_max_size>
 
     <!-- 异步日志同步频率，单位 ms, 建议为 1000ms以下，值越大丢日志的风险越高 -->
     <log_sync_interval>500</log_sync_interval>

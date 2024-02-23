@@ -1,13 +1,14 @@
 
 #include "RPC/net/rpc/rpc_controller.h"
+#include "RPC/common/log.h"
 
 namespace RPC{
     RpcController::RpcController(){
-
+        INFOLOG("RpcController");
     }
     
     RpcController::~RpcController(){
-
+         INFOLOG("~RpcController");
     }
 
     void RpcController::Reset(){

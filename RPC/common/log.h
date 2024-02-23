@@ -19,7 +19,6 @@
 
 namespace RPC{
     
-
     template<typename... Args>
     std::string formatString(const char* str,Args&&... args) {
 
