@@ -8,6 +8,4 @@
         <log_file_max_size>102400</log_file_max_size>
         <log_sync_interval>500</log_sync_interval>
     </log>
-
-    
 </root>
