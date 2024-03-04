@@ -6,62 +6,73 @@
 #include <string>
 
 #include "RPC/net/tcp/net_addr.h"
+#include "RPC/common/log.h"
 
-namespace RPC{
-    class RpcController : public google::protobuf::RpcController{
-        public:
-            RpcController();
-            ~RpcController();
+namespace RPC
+{
 
-            void Reset();
+  class RpcController : public google::protobuf::RpcController
+  {
 
-            bool Failed() const;
+  public:
+    RpcController() { INFOLOG("RpcController"); }
+    ~RpcController() { INFOLOG("~RpcController"); }
 
-            std::string ErrorText() const;
+    void Reset();
 
-            void StartCancel();
+    bool Failed() const;
 
-            void SetFailed(const std::string& reason);
+    std::string ErrorText() const;
 
-            bool IsCanceled() const;
+    void StartCancel();
 
-            void NotifyOnCancel(google::protobuf::Closure* callback);
+    void SetFailed(const std::string &reason);
 
-            void SetError(int32_t error_code, const std::string error_info);
+    bool IsCanceled() const;
 
-            int32_t GetErrorCode();
+    void NotifyOnCancel(google::protobuf::Closure *callback);
 
-            std::string GetErrorInfo();
+    void SetError(int32_t error_code, const std::string error_info);
 
-            void SetMsgId(const std::string& msg_id);
+    int32_t GetErrorCode();
 
-            std::string GetMsgId();
+    std::string GetErrorInfo();
 
-            void SetLocalAddr(NetAddr::s_ptr addr);
+    void SetMsgId(const std::string &msg_id);
 
-            void SetPeerAddr(NetAddr::s_ptr addr);
+    std::string GetMsgId();
 
-            NetAddr::s_ptr GetLocalAddr();
+    void SetLocalAddr(NetAddr::s_ptr addr);
 
-            NetAddr::s_ptr GetPeerAddr();
+    void SetPeerAddr(NetAddr::s_ptr addr);
 
-            void SetTimeout(int timeout);
+    NetAddr::s_ptr GetLocalAddr();
 
-            int GetTimeout();
+    NetAddr::s_ptr GetPeerAddr();
 
-        private:
-            int m_error_code {0};
-            std::string m_error_info;
-            std::string m_msg_id;
+    void SetTimeout(int timeout);
 
-            bool m_is_faild {false};
-            bool m_is_cancled {false};
+    int GetTimeout();
 
-            NetAddr::s_ptr m_local_addr;
-            NetAddr::s_ptr m_peer_addr;
+    bool Finished();
 
-            int m_timeout {1000};     // ms
-    };
+    void SetFinished(bool value);
+
+  private:
+    int32_t m_error_code{0};
+    std::string m_error_info;
+    std::string m_msg_id;
+
+    bool m_is_failed{false};
+    bool m_is_cancled{false};
+    bool m_is_finished{false};
+
+    NetAddr::s_ptr m_local_addr;
+    NetAddr::s_ptr m_peer_addr;
+
+    int m_timeout{1000}; // ms
+  };
+
 }
 
 #endif

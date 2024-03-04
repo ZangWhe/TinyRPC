@@ -1,76 +1,84 @@
 #ifndef RPC_NET_RPC_RPC_CHANNEL_H
 #define RPC_NET_RPC_RPC_CHANNEL_H
 
-#include <memory>
 #include <google/protobuf/service.h>
-
+#include <memory>
 #include "RPC/net/tcp/net_addr.h"
 #include "RPC/net/tcp/tcp_client.h"
 #include "RPC/net/timer_event.h"
 
-namespace RPC{
+namespace RPC
+{
 
-    #define NEWMESSAGE(type, var_name)                                                                                              \
-    std::shared_ptr<type> var_name = std::make_shared<type>();                                                                      \
+#define NEWMESSAGE(type, var_name) \
+  std::shared_ptr<type> var_name = std::make_shared<type>();
 
-    #define NEWRPCCONTROLLER(var_name)                                                                                              \
-    std::shared_ptr<RPC::RpcController> var_name = std::make_shared<RPC::RpcController>();                                          \
+#define NEWRPCCONTROLLER(var_name) \
+  std::shared_ptr<RPC::RpcController> var_name = std::make_shared<RPC::RpcController>();
 
-    #define NEWRPCCHANNEL(addr, var_name)                                                                                           \
-    std::shared_ptr<RPC::RpcChannel> var_name = std::make_shared<RPC::RpcChannel>(std::make_shared<RPC::IPNetAddr>(addr));          \
+#define NEWRPCCHANNEL(addr, var_name) \
+  std::shared_ptr<RPC::RpcChannel> var_name = std::make_shared<RPC::RpcChannel>(RPC::RpcChannel::FindAddr(addr));
 
-    #define CALLRPC(addr, stub_name, method_name, controller, request, response, closure)                                                      \
-    {                                                                                                                               \
-    NEWRPCCHANNEL(addr, channel)                                                                                                    \
-    channel->Init(controller,request,response,closure);                                                                             \
-    stub_name(channel.get()).method_name(controller.get(), request.get(), response.get(), closure.get());                           \
-    }                                                                                                                               \
+#define CALLRPC(addr, stub_name, method_name, controller, request, response, closure)                     \
+  {                                                                                                       \
+    NEWRPCCHANNEL(addr, channel);                                                                         \
+    channel->Init(controller, request, response, closure);                                                \
+    stub_name(channel.get()).method_name(controller.get(), request.get(), response.get(), closure.get()); \
+  }
 
-    class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>{
-        public:
-            typedef std::shared_ptr<RpcChannel> s_ptr;
-            typedef std::shared_ptr<google::protobuf::RpcController> controller_s_ptr;
-            typedef std::shared_ptr<google::protobuf::Message> message_s_ptr;
-            typedef std::shared_ptr<google::protobuf::Closure> closure_s_ptr;
+  class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>
+  {
 
-        public:
-            RpcChannel(NetAddr::s_ptr peer_addr);
+  public:
+    typedef std::shared_ptr<RpcChannel> s_ptr;
+    typedef std::shared_ptr<google::protobuf::RpcController> controller_s_ptr;
+    typedef std::shared_ptr<google::protobuf::Message> message_s_ptr;
+    typedef std::shared_ptr<google::protobuf::Closure> closure_s_ptr;
 
-            ~RpcChannel();
+  public:
+    // 获取 addr
+    // 若 str 是 ip:port, 直接返回
+    // 否则认为是 rpc 服务名，尝试从配置文件里面获取对应的 ip:port（后期会加上服务发现）
+    static NetAddr::s_ptr FindAddr(const std::string &str);
 
-            void CallMethod(const google::protobuf::MethodDescriptor* method,
-                          google::protobuf::RpcController* controller, const google::protobuf::Message* request,
-                          google::protobuf::Message* response, google::protobuf::Closure* done);
+  public:
+    RpcChannel(NetAddr::s_ptr peer_addr);
 
-            void Init(controller_s_ptr controller, message_s_ptr req, message_s_ptr res, closure_s_ptr done);
+    ~RpcChannel();
 
-            google::protobuf::RpcController* getController();
+    void Init(controller_s_ptr controller, message_s_ptr req, message_s_ptr res, closure_s_ptr done);
 
-            google::protobuf::Message* getRequest();
+    void CallMethod(const google::protobuf::MethodDescriptor *method,
+                    google::protobuf::RpcController *controller, const google::protobuf::Message *request,
+                    google::protobuf::Message *response, google::protobuf::Closure *done);
 
-            google::protobuf::Message* getResponse();
+    google::protobuf::RpcController *getController();
 
-            google::protobuf::Closure* getClosure();
+    google::protobuf::Message *getRequest();
 
-            TcpClient* getTcpClient();
+    google::protobuf::Message *getResponse();
 
-            TimerEvent::s_ptr getTimerEvent();
+    google::protobuf::Closure *getClosure();
 
-        private:
-            NetAddr::s_ptr m_local_addr {nullptr};
-            NetAddr::s_ptr m_peer_addr {nullptr};
+    TcpClient *getTcpClient();
 
-            controller_s_ptr m_controller {nullptr};
-            message_s_ptr m_request {nullptr};
-            message_s_ptr m_response {nullptr};
-            closure_s_ptr m_closure {nullptr};
+  private:
+    void callBack();
 
-            bool m_is_init {false};
+  private:
+    NetAddr::s_ptr m_peer_addr{nullptr};
+    NetAddr::s_ptr m_local_addr{nullptr};
 
-            TcpClient::s_ptr m_client {nullptr};
+    controller_s_ptr m_controller{nullptr};
+    message_s_ptr m_request{nullptr};
+    message_s_ptr m_response{nullptr};
+    closure_s_ptr m_closure{nullptr};
 
-            TimerEvent::s_ptr m_timer_event {nullptr};
-    };
+    bool m_is_init{false};
+
+    TcpClient::s_ptr m_client{nullptr};
+  };
+
 }
 
 #endif

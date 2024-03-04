@@ -1,98 +1,118 @@
-
 #include "RPC/net/rpc/rpc_controller.h"
-#include "RPC/common/log.h"
 
-namespace RPC{
-    RpcController::RpcController(){
-        INFOLOG("RpcController");
-    }
-    
-    RpcController::~RpcController(){
-         INFOLOG("~RpcController");
-    }
+namespace RPC
+{
 
-    void RpcController::Reset(){
-        m_error_code = 0;
-        m_error_info = "";
-        m_msg_id = "";
+  void RpcController::Reset()
+  {
+    m_error_code = 0;
+    m_error_info = "";
+    m_msg_id = "";
+    m_is_failed = false;
+    m_is_cancled = false;
+    m_is_finished = false;
+    m_local_addr = nullptr;
+    m_peer_addr = nullptr;
+    m_timeout = 1000; // ms
+  }
 
-        m_is_faild = false;
-        m_is_cancled = false;
+  bool RpcController::Failed() const
+  {
+    return m_is_failed;
+  }
 
-        m_local_addr = nullptr;
-        m_peer_addr = nullptr;
+  std::string RpcController::ErrorText() const
+  {
+    return m_error_info;
+  }
 
-        m_timeout = 1000;
-    }
+  void RpcController::StartCancel()
+  {
+    m_is_cancled = true;
+    m_is_failed = true;
+    SetFinished(true);
+  }
 
-    bool RpcController::Failed() const{
-        return m_is_faild;
-    }
+  void RpcController::SetFailed(const std::string &reason)
+  {
+    m_error_info = reason;
+    m_is_failed = true;
+  }
 
-    std::string RpcController::ErrorText() const{
-        return m_error_info;
-    }
+  bool RpcController::IsCanceled() const
+  {
+    return m_is_cancled;
+  }
 
-    void RpcController::StartCancel(){
-        m_is_cancled = true;
-    }
+  void RpcController::NotifyOnCancel(google::protobuf::Closure *callback)
+  {
+  }
 
-    void RpcController::SetFailed(const std::string& reason){
-        m_error_info = reason;
-    }
+  void RpcController::SetError(int32_t error_code, const std::string error_info)
+  {
+    m_error_code = error_code;
+    m_error_info = error_info;
+    m_is_failed = true;
+  }
 
-    bool RpcController::IsCanceled() const{
-        return m_is_cancled;
-    }
+  int32_t RpcController::GetErrorCode()
+  {
+    return m_error_code;
+  }
 
-    void RpcController::NotifyOnCancel(google::protobuf::Closure* callback){
-        ;
-    }
+  std::string RpcController::GetErrorInfo()
+  {
+    return m_error_info;
+  }
 
-    void RpcController::SetError(int32_t error_code, const std::string error_info){
-        m_error_code = error_code;
-        m_error_info = error_info;
-        m_is_faild = true;
-    }
+  void RpcController::SetMsgId(const std::string &msg_id)
+  {
+    m_msg_id = msg_id;
+  }
 
-    int32_t RpcController::GetErrorCode(){
-        return m_error_code;
-    }
+  std::string RpcController::GetMsgId()
+  {
+    return m_msg_id;
+  }
 
-    std::string RpcController::GetErrorInfo(){
-        return m_error_info;
-    }
+  void RpcController::SetLocalAddr(NetAddr::s_ptr addr)
+  {
+    m_local_addr = addr;
+  }
 
-    void RpcController::SetMsgId(const std::string& msg_id){
-        m_msg_id = msg_id;
-    }
+  void RpcController::SetPeerAddr(NetAddr::s_ptr addr)
+  {
+    m_peer_addr = addr;
+  }
 
-    std::string RpcController::GetMsgId(){
-        return m_msg_id;
-    }
+  NetAddr::s_ptr RpcController::GetLocalAddr()
+  {
+    return m_local_addr;
+  }
 
-    void RpcController::SetLocalAddr(NetAddr::s_ptr addr){
-        m_local_addr = addr;
-    }
+  NetAddr::s_ptr RpcController::GetPeerAddr()
+  {
+    return m_peer_addr;
+  }
 
-    void RpcController::SetPeerAddr(NetAddr::s_ptr addr){
-        m_peer_addr = addr;
-    }
+  void RpcController::SetTimeout(int timeout)
+  {
+    m_timeout = timeout;
+  }
 
-    NetAddr::s_ptr RpcController::GetLocalAddr(){
-        return m_local_addr;
-    }
+  int RpcController::GetTimeout()
+  {
+    return m_timeout;
+  }
 
-    NetAddr::s_ptr RpcController::GetPeerAddr(){
-        return m_peer_addr;
-    }
+  bool RpcController::Finished()
+  {
+    return m_is_finished;
+  }
 
-    void RpcController::SetTimeout(int timeout){
-        m_timeout = timeout;
-    }
-
-    int RpcController::GetTimeout(){
-        return m_timeout;
-    }
+  void RpcController::SetFinished(bool value)
+  {
+    m_is_finished = value;
+  }
 
 }

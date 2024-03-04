@@ -18,8 +18,6 @@ src_path = ""
 
 generator_path = sys.path[0]
 
-
-
 def to_camel(input_s):
     if input_s.find('_') == -1:
         return input_s

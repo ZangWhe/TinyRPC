@@ -4,22 +4,25 @@
 #include <string>
 #include "RPC/net/rpc/rpc_interface.h"
 
-namespace RPC{
-    class RunTime{
-        public:
+namespace RPC
+{
 
-        public:
-            static RunTime* GetRunTime();
+    class RpcInterface;
 
-            // static void SetRunTime();
+    class RunTime
+    {
+    public:
+        RpcInterface *getRpcInterface();
 
-        public:
-            std::string m_msg_id;
+    public:
+        static RunTime *GetRunTime();
 
-            std::string m_method_name;
-
-            RpcInterface* m_rpc_interface {NULL};
+    public:
+        std::string m_msg_id;
+        std::string m_method_name;
+        RpcInterface *m_rpc_interface{NULL};
     };
+
 }
 
 #endif
