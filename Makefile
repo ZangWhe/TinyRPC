@@ -13,6 +13,7 @@ PATH_NET = $(PATH_TinyRPC)/net
 PATH_TCP = $(PATH_TinyRPC)/net/tcp
 PATH_CODER = $(PATH_TinyRPC)/net/coder
 PATH_RPC = $(PATH_TinyRPC)/net/rpc
+PATH_HASH = $(PATH_TinyRPC)/consistent_hash
 
 
 
@@ -31,6 +32,7 @@ PATH_INSTALL_INC_NET = $(PATH_INSTALL_INC_ROOT)/$(PATH_NET)
 PATH_INSTALL_INC_TCP = $(PATH_INSTALL_INC_ROOT)/$(PATH_TCP)
 PATH_INSTALL_INC_CODER = $(PATH_INSTALL_INC_ROOT)/$(PATH_CODER)
 PATH_INSTALL_INC_RPC = $(PATH_INSTALL_INC_ROOT)/$(PATH_RPC)
+PATH_INSTALL_INC_HASH = $(PATH_INSTALL_INC_ROOT)/$(PATH_HASH)
 
 
 
@@ -46,7 +48,7 @@ CXX := g++
 CXXFLAGS += -g -O0 -std=c++11 -Wall -Wno-deprecated -Wno-unused-but-set-variable
 
 
-CXXFLAGS += -I ./ -I$(PATH_TinyRPC)	-I$(PATH_COMM) -I$(PATH_NET) -I$(PATH_TCP) -I$(PATH_CODER) -I$(PATH_RPC)
+CXXFLAGS += -I ./ -I$(PATH_TinyRPC)	-I$(PATH_COMM) -I$(PATH_NET) -I$(PATH_TCP) -I$(PATH_CODER) -I$(PATH_RPC) -I$(PATH_HASH)
 
 
 # CXXFLAGS += -letcd-cpp-api -lprotobuf  -lgrpc++ -lgrpc -lz -lcpprest -lssl -lcrypto -lboost_system
@@ -60,7 +62,7 @@ NET_OBJ := $(patsubst $(PATH_NET)/%.cc, $(PATH_OBJ)/%.o, $(wildcard $(PATH_NET)/
 TCP_OBJ := $(patsubst $(PATH_TCP)/%.cc, $(PATH_OBJ)/%.o, $(wildcard $(PATH_TCP)/*.cc))
 CODER_OBJ := $(patsubst $(PATH_CODER)/%.cc, $(PATH_OBJ)/%.o, $(wildcard $(PATH_CODER)/*.cc))
 RPC_OBJ := $(patsubst $(PATH_RPC)/%.cc, $(PATH_OBJ)/%.o, $(wildcard $(PATH_RPC)/*.cc))
-
+HASH_OBJ := $(patsubst $(PATH_HASH)/%.cc, $(PATH_OBJ)/%.o, $(wildcard $(PATH_HASH)/*.cc))
 
 ALL_TESTS : $(PATH_BIN)/test_log $(PATH_BIN)/test_eventloop $(PATH_BIN)/test_tcp $(PATH_BIN)/test_client $(PATH_BIN)/test_rpc_client $(PATH_BIN)/test_rpc_server $(PATH_BIN)/test_etcd
 
@@ -98,7 +100,7 @@ $(PATH_BIN)/test_etcd: $(LIB_OUT)
 
 
 
-$(LIB_OUT): $(COMM_OBJ) $(NET_OBJ) $(TCP_OBJ) $(CODER_OBJ) $(RPC_OBJ)
+$(LIB_OUT): $(COMM_OBJ) $(NET_OBJ) $(TCP_OBJ) $(CODER_OBJ) $(RPC_OBJ) $(HASH_OBJ)
 	cd $(PATH_OBJ) && ar rcv libTinyRPC.a *.o && cp libTinyRPC.a ../lib/
 
 
@@ -117,7 +119,8 @@ $(PATH_OBJ)/%.o : $(PATH_CODER)/%.cc
 $(PATH_OBJ)/%.o : $(PATH_RPC)/%.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-
+$(PATH_OBJ)/%.o : $(PATH_HASH)/%.cc
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # print something test
 # like this: make PRINT-PATH_BIN, and then will print variable PATH_BIN
@@ -130,13 +133,14 @@ clean :
 
 # install
 install:
-	mkdir -p $(PATH_INSTALL_INC_COMM) $(PATH_INSTALL_INC_NET) $(PATH_INSTALL_INC_TCP) $(PATH_INSTALL_INC_CODER) $(PATH_INSTALL_INC_RPC) \
+	mkdir -p $(PATH_INSTALL_INC_COMM) $(PATH_INSTALL_INC_NET) $(PATH_INSTALL_INC_TCP) $(PATH_INSTALL_INC_CODER) $(PATH_INSTALL_INC_RPC) $(PATH_INSTALL_INC_HASH)\
 		&& cp $(PATH_COMM)/*.h $(PATH_INSTALL_INC_COMM) \
 		&& cp $(PATH_NET)/*.h $(PATH_INSTALL_INC_NET) \
 		&& cp $(PATH_TCP)/*.h $(PATH_INSTALL_INC_TCP) \
 		&& cp $(PATH_CODER)/*.h $(PATH_INSTALL_INC_CODER) \
 		&& cp $(PATH_RPC)/*.h $(PATH_INSTALL_INC_RPC) \
-		&& cp $(LIB_OUT) $(PATH_INSTALL_LIB_ROOT)/
+		&& cp $(PATH_RPC)/*.h $(PATH_INSTALL_INC_HASH) \
+		&& cp $(LIB_OUT) $(PATH_INSTALL_LIB_ROOT)	/
 		
 
 

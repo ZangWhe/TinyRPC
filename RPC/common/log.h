@@ -1,5 +1,5 @@
-#ifndef TinyRPC_COMMON_LOG_H
-#define TinyRPC_COMMON_LOG_H
+#ifndef RPC_COMMON_LOG_H
+#define RPC_COMMON_LOG_H
 
 #include<string>
 #include<queue>

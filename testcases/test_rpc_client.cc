@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <google/protobuf/service.h>
 #include <etcd/Client.hpp>
+#include <functional>
 
 #include "RPC/net/tcp/tcp_client.h"
 #include "RPC/common/log.h"
@@ -25,6 +26,8 @@
 #include "RPC/net/rpc/rpc_controller.h"
 #include "RPC/net/rpc/rpc_closure.h"
 #include "order.pb.h"
+#include "RPC/consistent_hash/consistent_hash_h"
+#include "RPC/consistent_hash/murmurhash3.h"
 
 void test_tcp_client()
 {
@@ -60,8 +63,7 @@ void test_tcp_client()
                 ERRORLOG("deserilize error");
                 return ;
             }
-            DEBUGLOG("get response success, response [%s]",response.ShortDebugString().c_str()); });
-                 });
+            DEBUGLOG("get response success, response [%s]",response.ShortDebugString().c_str()); }); });
 }
 
 void test_rpc_channel(std::string addr)
@@ -101,7 +103,7 @@ void test_rpc_channel(std::string addr)
     channel.reset(); });
 
   {
-    std::shared_ptr<RPC::RpcChannel> channel = std::make_shared<RPC::RpcChannel>(RPC::RpcChannel::FindAddr("127.0.0.1:12345"));
+    std::shared_ptr<RPC::RpcChannel> channel = std::make_shared<RPC::RpcChannel>(RPC::RpcChannel::FindAddr(addr));
     ;
     channel->Init(controller, request, response, closure);
     Order_Stub(channel.get()).makeOrder(controller.get(), request.get(), response.get(), closure.get());
@@ -112,6 +114,8 @@ void test_rpc_channel(std::string addr)
   // xxx
   // 协程
 }
+
+
 
 int main()
 {
@@ -130,14 +134,58 @@ int main()
     // std::string value_addr = response.value().as_string();
     if (response.is_ok())
     {
-      for(size_t i=0; i<response.keys().size();++i){
-        std::string key_service = response.keys()[i];
-        std::string value_addr = response.value(i).as_string();
-        DEBUGLOG("get service success, service : %s addr : %s", key_service.c_str(), value_addr.c_str());
-      }
-      
+
+      // for (size_t i = 0; i < response.keys().size(); ++i)
+      // {
+      //   std::string key_service = response.keys()[i];
+      //   std::string value_addr = response.value(i).as_string();
+      //   DEBUGLOG("get service success, service : %s addr : %s", key_service.c_str(), value_addr.c_str());
+      // }
+      int server_num = response.keys().size();
+      int virtual_num = 100;
+      RPC::ConsistentHash *consistent_hash = new RPC::ConsistentHash(server_num, virtual_num);
+
+      consistent_hash->Initialize();
+      INFOLOG("consistent hash initialize success, server num : %d, virtual num : %d", server_num, virtual_num);
+
+      size_t index = consistent_hash->GetServerIndex(key_service.c_str());
+      std::string value_addr = response.value(index).as_string();
+      INFOLOG("get service success, service : %s addr : %s", response.keys()[index].c_str(), value_addr.c_str());
+
+      std::function<void()> watch_for_changes = [&]()
+      {
+        etcd.watch(response.keys()[index]).then([&](pplx::task<etcd::Response> resp_task){
+            std::string new_value_addr;
+            try{
+              etcd::Response resp = resp_task.get();
+
+              INFOLOG("target server changed, action is %s, prev_value is %s",resp.action().c_str(), resp.prev_value().as_string().c_str());
+              
+              if(resp.action() == "delete"){
+                bool sign = consistent_hash->DeleteNode(index);
+                if(!sign){
+                  DEBUGLOG("the server num is not enough");
+                  exit(0);
+                }
+                size_t index = consistent_hash->GetServerIndex(key_service.c_str());
+                new_value_addr = response.value(index).as_string();
+                INFOLOG("restart new server, service : %s addr : %s",response.keys()[index].c_str(), new_value_addr.c_str());
+              }else if(resp.action() == "set"){
+                new_value_addr = resp.value().as_string();
+                INFOLOG("restart new client, service : %s addr : %s",response.keys()[index].c_str(), new_value_addr.c_str());
+              }
+
+            }catch(...){
+              ERRORLOG("etcd watch error");
+            }
+            watch_for_changes();
+            test_rpc_channel(new_value_addr);
+          });
+      };
+      watch_for_changes();
       // test_tcp_client();
-      // test_rpc_channel(value_addr);
+
+      test_rpc_channel(value_addr);
     }
     else
     {
