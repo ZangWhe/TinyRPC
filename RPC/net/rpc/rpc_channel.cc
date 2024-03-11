@@ -50,6 +50,7 @@ namespace RPC
     std::shared_ptr<RPC::TinyPBProtocol> req_protocol = std::make_shared<RPC::TinyPBProtocol>();
 
     RpcController *my_controller = dynamic_cast<RpcController *>(controller);
+
     if (my_controller == NULL || request == NULL || response == NULL)
     {
       ERRORLOG("failed callmethod, RpcController convert error");
@@ -116,18 +117,19 @@ namespace RPC
     s_ptr channel = shared_from_this();
 
     TimerEvent::s_ptr timer_event = std::make_shared<TimerEvent>(my_controller->GetTimeout(), false, [my_controller, channel]() mutable
-                                                                 {
-    INFOLOG("%s | call rpc timeout arrive", my_controller->GetMsgId().c_str());
-    if (my_controller->Finished()) {
-      channel.reset();
-      return;
-    }
+    {
+            INFOLOG("%s | call rpc timeout arrive", my_controller->GetMsgId().c_str());
+            if (my_controller->Finished()) {
+              channel.reset();
+              return;
+            }
 
-    my_controller->StartCancel();
-    my_controller->SetError(ERROR_RPC_CALL_TIMEOUT, "rpc call timeout " + std::to_string(my_controller->GetTimeout()));
+            my_controller->StartCancel();
+            my_controller->SetError(ERROR_RPC_CALL_TIMEOUT, "rpc call timeout " + std::to_string(my_controller->GetTimeout()));
 
-    channel->callBack();
-    channel.reset(); });
+            channel->callBack();
+            channel.reset(); 
+    });
 
     m_client->addTimerEvent(timer_event);
 
